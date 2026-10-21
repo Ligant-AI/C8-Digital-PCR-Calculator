@@ -1,0 +1,604 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://benchtools.ligant.ai/digital-pcr-calculator/schema/ligant-benchtools-record-1.0.0.schema.json",
+  "title": "Ligant Bench Tools saved record, format 1.0.0",
+  "description": "The saved record of one analysis made with a Ligant Bench Tools calculator. Every tool writes the same outer part: which tool and version made it, the date, what the tool covers and how to cite it, every declaration with its basis, every constant and published value used with its source, every entry exactly as typed with its unit, every result with its unrounded value and the text shown on the page, and every flag in words. Each tool adds its own section, named \"tool\", whose shape that tool documents. A record holds only what the page already holds. Nothing in it is sent anywhere: you save it, and you choose where it goes.",
+  "type": "object",
+  "required": ["format", "madeWith", "date", "statements", "precision", "outcome", "declarations", "constants", "assumptions", "inputs", "results", "flags", "tool"],
+  "additionalProperties": false,
+  "properties": {
+    "format": {
+      "type": "object",
+      "required": ["name", "version", "schema"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "const": "ligant-benchtools-record", "description": "The name of this record format, the same for every tool in the suite." },
+        "version": { "const": "1.0.0", "description": "The version of this record format." },
+        "schema": { "const": "https://benchtools.ligant.ai/digital-pcr-calculator/schema/ligant-benchtools-record-1.0.0.schema.json", "description": "Where this format's description can be read." }
+      },
+      "description": "The name and version of the record format."
+    },
+    "madeWith": {
+      "type": "object",
+      "required": ["suiteId", "name", "address", "toolVersion", "engineVersion", "engineCode", "orderOfEvaluation"],
+      "additionalProperties": false,
+      "properties": {
+        "suiteId": { "type": "string", "pattern": "^[A-Z][0-9]+$", "description": "The tool's short identifier in the suite, for example C8." },
+        "name": { "$ref": "#/$defs/text", "description": "The tool's name as the page shows it." },
+        "address": { "type": "string", "pattern": "^https://benchtools\\.ligant\\.ai/[a-z0-9-]+/$", "description": "The tool's web address." },
+        "toolVersion": { "$ref": "#/$defs/version", "description": "The version of the tool that made the record." },
+        "engineVersion": { "$ref": "#/$defs/version", "description": "The version of the calculation engine. Two records with the same engine version come from the same arithmetic." },
+        "engineCode": { "type": "string", "pattern": "^https://github\\.com/Ligant-AI/[A-Za-z0-9-]+/tree/engine-v[0-9]+\\.[0-9]+\\.[0-9]+$", "description": "The public source code of this engine version." },
+        "orderOfEvaluation": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "required": ["version", "words"],
+              "additionalProperties": false,
+              "properties": {
+                "version": { "type": "integer", "minimum": 1, "description": "The version of the order in which the steps of the calculation are carried out." },
+                "words": { "$ref": "#/$defs/text", "description": "The same, in words, as the exports print it." }
+              }
+            }
+          ],
+          "description": "The order in which the calculation's steps are carried out, so that two results can be shown to come from the same arithmetic. Null for a tool that does not state one."
+        }
+      },
+      "description": "The tool, tool version and engine version that made the record."
+    },
+    "date": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$",
+      "description": "The date the record was saved, as year-month-day on the computer that saved it. A date only: no time of day and no time zone."
+    },
+    "statements": {
+      "type": "object",
+      "required": ["scope", "researchUse", "citation", "doi"],
+      "additionalProperties": false,
+      "properties": {
+        "scope": { "$ref": "#/$defs/text", "description": "What the tool covers, so the record says so wherever it goes." },
+        "researchUse": { "const": "Research use only. Not qualified for GxP decision-making.", "description": "The suite's research-use statement." },
+        "citation": { "$ref": "#/$defs/text", "description": "How to cite the tool, with its version." },
+        "doi": { "oneOf": [{ "type": "null" }, { "type": "string", "pattern": "^10\\.[0-9]{4,9}/\\S+$" }], "description": "The tool's DOI, or null while the release has none." }
+      },
+      "description": "Statements that travel with every record."
+    },
+    "precision": {
+      "type": "object",
+      "required": ["display", "rounding"],
+      "additionalProperties": false,
+      "properties": {
+        "display": { "$ref": "#/$defs/text", "description": "How many digits each kind of value is shown with, and what that number of digits does and does not mean." },
+        "rounding": { "$ref": "#/$defs/text", "description": "How and when values are rounded." }
+      },
+      "description": "The display precision and the rounding rule."
+    },
+    "outcome": {
+      "oneOf": [
+        { "$ref": "#/$defs/outcomeResult" },
+        { "$ref": "#/$defs/outcomeIncomplete" },
+        { "$ref": "#/$defs/outcomeRefused" },
+        { "$ref": "#/$defs/outcomeUnsupported" },
+        { "$ref": "#/$defs/outcomeError" }
+      ],
+      "description": "Whether a result was computed, and if not, why not: declarations still to make, entries the tool refuses, a case this release does not support, or entries that could not be read."
+    },
+    "declarations": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/declaration" },
+      "description": "Every declaration made for the analysis, each with its basis. A declaration not yet made is left out. A tool that reads this record shows you each of these before it uses any value, and asks you to confirm."
+    },
+    "constants": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/constant" },
+      "description": "Every relation, constant, published value, threshold and convention the analysis used, each with its value, its basis and, where it has one, its source and the quoted words."
+    },
+    "assumptions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/assumption" },
+      "description": "The assumptions under which the results hold."
+    },
+    "inputs": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/input" },
+      "description": "Every entry exactly as typed or pasted, with its unit, and beside it the converted value where the tool converted one."
+    },
+    "results": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/result" },
+      "description": "Every computed value, with its unit, the relation used, the working with your numbers, its unrounded value and the text shown on the page. Empty when no result was computed."
+    },
+    "flags": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/flag" },
+      "description": "Every flag raised, in code order, each in words. A flag never stops a result. Empty when no result was computed."
+    },
+    "tool": {
+      "type": "object",
+      "required": ["shape"],
+      "properties": {
+        "shape": {
+          "type": "object",
+          "required": ["name", "version"],
+          "additionalProperties": false,
+          "properties": {
+            "name": { "$ref": "#/$defs/text", "description": "The name of the tool's section shape." },
+            "version": { "$ref": "#/$defs/version", "description": "The version of the tool's section shape." }
+          },
+          "description": "Which section shape follows, so a reader knows how to read the rest of the section."
+        }
+      },
+      "description": "The tool's own section: how its entries and results fit together (for example, which well belongs to which preparation). Each tool documents its shape. It refers to the entries, results and declarations above by their id and repeats no number. It holds nothing listed under \"It does not contain\" in this format's README: no time of day or time zone, no identifier for the record, the computer or the person, no raw pasted table or unmapped column, nothing from the export email step or the consent choice, and no browser, language setting or location."
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "outcome": { "properties": { "status": { "const": "result" } } } } },
+      "then": { "properties": { "results": { "minItems": 1 } } },
+      "else": { "properties": { "results": { "maxItems": 0 }, "flags": { "maxItems": 0 } } }
+    },
+    {
+      "if": { "properties": { "madeWith": { "properties": { "suiteId": { "const": "C8" } } } } },
+      "then": { "$ref": "#/$defs/c8Record" }
+    }
+  ],
+  "$defs": {
+    "text": { "type": "string", "minLength": 1, "description": "Text that is not empty." },
+    "textOrNull": { "oneOf": [{ "type": "null" }, { "type": "string", "minLength": 1 }], "description": "Text, or null where it does not apply." },
+    "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$", "description": "A version number, major.minor.patch." },
+    "id": { "type": "string", "pattern": "^[a-z0-9-]+(:.+)?$", "description": "The id of an entry, declaration, constant or result within this record: a kind, then, after a colon, the well, preparation or step it belongs to, as you named it." },
+    "idList": { "type": "array", "items": { "$ref": "#/$defs/id" }, "description": "Ids of other parts of this record." },
+    "unit": {
+      "oneOf": [
+        { "type": "null" },
+        { "type": "string", "minLength": 1, "pattern": "^[^\\u03BC]+$" }
+      ],
+      "description": "A unit, written in full as the page writes it, or null for a value with no unit, such as a count, or for a unit not yet chosen. The micro sign is the character µ (U+00B5). The Greek letter mu (U+03BC) is never used, so that two units that look alike are also alike to a computer. A tool that reads a record compares units exactly as written and never converts one silently."
+    },
+    "names": { "type": "array", "items": { "$ref": "#/$defs/text" }, "description": "The wells, preparations or steps named, as you named them." },
+    "outcomeResult": {
+      "type": "object",
+      "required": ["status", "words", "missing", "refusals", "notSupported", "message"],
+      "additionalProperties": false,
+      "properties": {
+        "status": { "const": "result" },
+        "words": { "$ref": "#/$defs/text" },
+        "missing": { "type": "array", "maxItems": 0 },
+        "refusals": { "type": "array", "maxItems": 0 },
+        "notSupported": { "type": "array", "maxItems": 0 },
+        "message": { "type": "null" }
+      },
+      "description": "A result was computed."
+    },
+    "outcomeIncomplete": {
+      "type": "object",
+      "required": ["status", "words", "missing", "refusals", "notSupported", "message"],
+      "additionalProperties": false,
+      "properties": {
+        "status": { "const": "incomplete" },
+        "words": { "$ref": "#/$defs/text" },
+        "missing": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/text" }, "description": "Each declaration still to make, in words." },
+        "refusals": { "type": "array", "maxItems": 0 },
+        "notSupported": { "type": "array", "maxItems": 0 },
+        "message": { "type": "null" }
+      },
+      "description": "No result yet: some declarations are still to be made."
+    },
+    "outcomeRefused": {
+      "type": "object",
+      "required": ["status", "words", "missing", "refusals", "notSupported", "message"],
+      "additionalProperties": false,
+      "properties": {
+        "status": { "const": "refused" },
+        "words": { "$ref": "#/$defs/text" },
+        "missing": { "type": "array", "maxItems": 0 },
+        "refusals": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["message", "names"],
+            "additionalProperties": false,
+            "properties": {
+              "message": { "$ref": "#/$defs/text", "description": "What is refused, why, and what to enter instead, with your numbers, naming the entries by their labels. It quotes only the entries it is about, as the record already holds them, and no other pasted text." },
+              "names": { "$ref": "#/$defs/names", "description": "The wells, preparations or steps the message is about; empty where it is about the whole analysis." }
+            }
+          },
+          "description": "Every entry the tool refuses, each with its message."
+        },
+        "notSupported": { "type": "array", "maxItems": 0 },
+        "message": { "type": "null" }
+      },
+      "description": "No result: an entry is refused. A refused entry computes nothing."
+    },
+    "outcomeUnsupported": {
+      "type": "object",
+      "required": ["status", "words", "missing", "refusals", "notSupported", "message"],
+      "additionalProperties": false,
+      "properties": {
+        "status": { "const": "unsupported" },
+        "words": { "$ref": "#/$defs/text" },
+        "missing": { "type": "array", "maxItems": 0 },
+        "refusals": { "type": "array", "maxItems": 0 },
+        "notSupported": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/text" }, "description": "What this release does not support, and what to do instead." },
+        "message": { "type": "null" }
+      },
+      "description": "No result: the case is not supported in this release."
+    },
+    "outcomeError": {
+      "type": "object",
+      "required": ["status", "words", "missing", "refusals", "notSupported", "message"],
+      "additionalProperties": false,
+      "properties": {
+        "status": { "const": "error" },
+        "words": { "$ref": "#/$defs/text" },
+        "missing": { "type": "array", "maxItems": 0 },
+        "refusals": { "type": "array", "maxItems": 0 },
+        "notSupported": { "type": "array", "maxItems": 0 },
+        "message": { "$ref": "#/$defs/text", "description": "What could not be read, naming the entries by their labels. It never quotes pasted text." }
+      },
+      "description": "No result: the entries could not be read together."
+    },
+    "basis": {
+      "type": "object",
+      "required": ["kind", "words", "constant"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": ["user", "user-named-source", "published-value", "tool-rule"],
+          "description": "Where the declaration comes from: \"user\", your own declaration; \"user-named-source\", a value you entered with the source you name; \"published-value\", a value you inserted from the tool's published values, whose source is in the constants; \"tool-rule\", fixed by how the tool works, for example that typed numbers use a full stop."
+        },
+        "words": { "$ref": "#/$defs/text", "description": "The basis in words, for example \"user's own\" or the source you named." },
+        "constant": { "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/id" }], "description": "For a published value, the id of its entry in the constants, which holds its source and quote; otherwise null." }
+      },
+      "description": "The declared basis of a declaration."
+    },
+    "declaration": {
+      "type": "object",
+      "required": ["id", "label", "of", "value", "text", "unit", "basis"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "label": { "$ref": "#/$defs/text", "description": "The question or field, as the page labels it." },
+        "of": { "$ref": "#/$defs/textOrNull", "description": "The preparation, well or step it applies to, or null where it applies to the whole analysis." },
+        "value": { "oneOf": [{ "type": "null" }, { "type": "string", "minLength": 1 }], "description": "The choice, as a fixed short identifier that a reading tool can compare, or, for a value you typed, the text exactly as typed. Null for free text, whose words are in \"text\"." },
+        "text": { "$ref": "#/$defs/text", "description": "The answer in words, exactly as the page shows it or as you typed it." },
+        "unit": { "$ref": "#/$defs/unit" },
+        "basis": { "$ref": "#/$defs/basis" }
+      },
+      "description": "One declaration, with its basis."
+    },
+    "source": {
+      "type": "object",
+      "required": ["citation", "url", "dateRead", "quotes", "tableVersion", "note"],
+      "additionalProperties": false,
+      "properties": {
+        "citation": { "$ref": "#/$defs/text", "description": "The source, cited." },
+        "url": { "oneOf": [{ "type": "null" }, { "type": "string", "pattern": "^https://\\S+$" }], "description": "Where the source can be read, or null." },
+        "dateRead": { "$ref": "#/$defs/textOrNull", "description": "The date the source was read, for a web page that can change; null for a published paper." },
+        "quotes": { "type": "array", "items": { "$ref": "#/$defs/text" }, "description": "The source's own words, quoted exactly." },
+        "tableVersion": { "$ref": "#/$defs/textOrNull", "description": "The version of the tool's table of published values the value came from, or null." },
+        "note": { "$ref": "#/$defs/textOrNull", "description": "A statement that goes with the source, for example that the tool cannot know the value for your instrument." }
+      },
+      "description": "A cited source, with its exact words."
+    },
+    "constant": {
+      "type": "object",
+      "required": ["id", "name", "value", "unit", "kind", "status", "basis", "appliesTo", "source", "labelledAs"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "name": { "$ref": "#/$defs/text" },
+        "value": { "$ref": "#/$defs/text", "description": "The value, relation or rule, in words or as a formula." },
+        "unit": { "$ref": "#/$defs/unit" },
+        "kind": { "enum": ["relation", "constant", "published-value", "threshold", "convention", "limit"], "description": "What kind of item it is: a relation; a constant; a published value you inserted; a threshold at which the tool changes what it does; a convention; or a limit on how much one analysis can hold." },
+        "status": { "enum": ["derived", "measured", "characterised", "disclosed"], "description": "How the item is supported: derived from a stated relation; measured; characterised by a stated test; or disclosed, stated with its basis." },
+        "basis": { "$ref": "#/$defs/text", "description": "Why the value is what it is, in words." },
+        "appliesTo": { "$ref": "#/$defs/text", "description": "The results or entries this item applies to, in words." },
+        "source": { "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/source" }], "description": "The source, where the item has one." },
+        "labelledAs": { "$ref": "#/$defs/textOrNull", "description": "Where part of the item is the tool's own reading rather than the source's, that part, labelled as such." }
+      },
+      "description": "One relation, constant, published value, threshold, convention or limit used."
+    },
+    "assumption": {
+      "type": "object",
+      "required": ["assumption", "appliesTo", "status"],
+      "additionalProperties": false,
+      "properties": {
+        "assumption": { "$ref": "#/$defs/text" },
+        "appliesTo": { "$ref": "#/$defs/text" },
+        "status": { "enum": ["derived", "measured", "characterised", "disclosed"] }
+      },
+      "description": "One assumption, with the results it applies to."
+    },
+    "input": {
+      "type": "object",
+      "required": ["id", "label", "of", "entered", "unit", "converted", "restsOn"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "label": { "$ref": "#/$defs/text", "description": "The field, as the page labels it." },
+        "of": { "$ref": "#/$defs/textOrNull", "description": "The well, preparation or step it belongs to, or null for the whole analysis." },
+        "entered": { "type": "string", "description": "Exactly what was typed, or for a pasted count the text of its mapped cell, under the declared decimal separator, including text the tool refused. Never the pasted table itself." },
+        "unit": { "$ref": "#/$defs/unit" },
+        "converted": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "required": ["text", "unit", "unrounded"],
+              "additionalProperties": false,
+              "properties": {
+                "text": { "$ref": "#/$defs/text", "description": "The entered value in the tool's working unit, made by moving the decimal point in the entered text." },
+                "unit": { "$ref": "#/$defs/unit" },
+                "unrounded": { "type": "number", "description": "That text, read once as a number." }
+              }
+            }
+          ],
+          "description": "The value in the tool's working unit where the tool converted it; null where no conversion was made or the entry could not be read."
+        },
+        "restsOn": { "$ref": "#/$defs/idList", "description": "The declarations and constants that say what this entry is, for example the source of a partition volume." }
+      },
+      "description": "One entry, as typed."
+    },
+    "resultCommon": {
+      "type": "object",
+      "required": ["id", "label", "of", "unit", "relation", "working", "status", "unrounded", "display", "note", "restsOn"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "label": { "$ref": "#/$defs/text", "description": "What the value is, with its full unit name." },
+        "of": { "$ref": "#/$defs/textOrNull", "description": "The well or preparation it belongs to, or null for a value of the whole analysis, such as a mean." },
+        "unit": { "$ref": "#/$defs/unit" },
+        "relation": { "$ref": "#/$defs/text", "description": "The relation used, as a formula in words." },
+        "working": { "$ref": "#/$defs/textOrNull", "description": "The relation with your numbers substituted, as the page's working shows it; null where the value was not computed." },
+        "status": { "enum": ["computed", "undefined", "withheld"] },
+        "unrounded": { "oneOf": [{ "type": "null" }, { "type": "number" }] },
+        "display": { "oneOf": [{ "type": "null" }, { "type": "string", "minLength": 1 }] },
+        "note": { "$ref": "#/$defs/textOrNull", "description": "Why a value is undefined or withheld, in words; null for a computed value." },
+        "restsOn": { "$ref": "#/$defs/idList", "description": "The declarations and constants this value rests on: where a tool that reads the record looks for the value's basis. It refuses the value where its unit or basis does not match one of the reading tool's own required declarations, and says which." }
+      }
+    },
+    "result": {
+      "allOf": [
+        { "$ref": "#/$defs/resultCommon" },
+        {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "status": { "const": "computed" },
+                "unrounded": { "type": "number", "description": "The value as computed, before any rounding, written as the shortest decimal that reads back to the same double-precision number. Read it as a double." },
+                "display": { "type": "string", "minLength": 1, "description": "The text the page shows, rounded once." },
+                "note": { "type": "null" }
+              },
+              "description": "A computed value."
+            },
+            {
+              "type": "object",
+              "properties": {
+                "status": { "const": "undefined" },
+                "unrounded": { "type": "null" },
+                "note": { "type": "string", "minLength": 1 }
+              },
+              "description": "A value that has no number, for example where every accepted partition is positive. The display is null, or the words the page shows in its place."
+            },
+            {
+              "type": "object",
+              "properties": {
+                "status": { "const": "withheld" },
+                "unrounded": { "type": "null" },
+                "display": { "type": "null" },
+                "note": { "type": "string", "minLength": 1 }
+              },
+              "description": "A value the tool does not report, with the reason in words, for example a mean that includes an undefined well."
+            }
+          ]
+        }
+      ],
+      "description": "One computed value."
+    },
+    "flag": {
+      "type": "object",
+      "required": ["code", "words", "names", "results"],
+      "additionalProperties": false,
+      "properties": {
+        "code": { "type": "string", "pattern": "^FL-[0-9]{2}$", "description": "The flag's short code, FL-nn. The page's flag legend says what each means." },
+        "words": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/text" }, "description": "The flag in words: what happened, why it matters, what to do. One entry for each well or step it names, where it names several." },
+        "names": { "$ref": "#/$defs/names", "description": "The wells or steps the flag names; empty where it is about the whole analysis." },
+        "results": { "$ref": "#/$defs/idList", "description": "Results the flag reports, such as a ratio it compares with your limit." }
+      },
+      "description": "One flag."
+    },
+
+    "c8Record": {
+      "description": "The rules for a record made by the Digital PCR Calculator.",
+      "properties": {
+        "madeWith": {
+          "properties": {
+            "name": { "const": "Ligant · Digital PCR Calculator" },
+            "address": { "const": "https://benchtools.ligant.ai/digital-pcr-calculator/" },
+            "engineCode": { "pattern": "^https://github\\.com/Ligant-AI/C8-Digital-PCR-Calculator/tree/engine-v[0-9]+\\.[0-9]+\\.[0-9]+$" },
+            "orderOfEvaluation": {
+              "type": "object",
+              "properties": { "version": { "const": 1 }, "words": { "const": "order of evaluation 1" } }
+            }
+          }
+        },
+        "declarations": { "items": { "$ref": "#/$defs/c8Declaration" } },
+        "inputs": { "items": { "$ref": "#/$defs/c8Input" } },
+        "results": { "items": { "$ref": "#/$defs/c8Result" } },
+        "flags": { "items": { "properties": { "code": { "pattern": "^FL-0[1-9]$" } } } },
+        "tool": { "$ref": "#/$defs/c8Section" }
+      }
+    },
+    "c8Declaration": {
+      "properties": {
+        "id": {
+          "pattern": "^(mode|data-entry|decimal-separator|partition-volume-source|instrument|target-name|expected-accepted|free-dna|free-dna-method|capsid-opening|capsid-opening-conditions|target-class|ratio-limit|range-low|range-high|dilution:.+)$",
+          "description": "Which declaration: the mode; how the data were entered; the decimal separator; the source of the partition volume; the instrument and software version; the target name; the accepted partitions you expected; in titer mode, whether free DNA was removed and how, how capsids were opened and the conditions, the target class, your limit for highest to lowest ticked well and your working range; and, for each preparation, whether and how the sample was diluted."
+        }
+      }
+    },
+    "c8Input": {
+      "properties": {
+        "id": {
+          "pattern": "^(partition-volume|total:.+|sample:.+|mix:.+|step-in:.+|step-total:.+|factor:.+|positive:.+|accepted:.+)$",
+          "description": "Which entry: the partition volume; for each preparation, the total reaction volume after the sample is added, the volume of sample, the master mix per reaction where filled, and each dilution step's volume in and total volume, or one overall factor; for each well, the positive and the accepted partitions."
+        },
+        "unit": { "enum": [null, "µL", "nL", "pL"], "description": "nL, pL or µL for the partition volume; µL for every other volume; none for a count or a typed factor." }
+      }
+    },
+    "c8Result": {
+      "oneOf": [
+        {
+          "properties": {
+            "id": { "pattern": "^(copies-per-ul-reaction|copies-per-ul-diluted):.+$" },
+            "unit": { "enum": ["copies per µL of reaction", "copies per µL of the diluted sample"] },
+            "display": { "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/c8Estimate" }] }
+          },
+          "description": "Copies per µL of reaction and of the diluted sample, for one well."
+        },
+        {
+          "properties": {
+            "id": { "pattern": "^((copies-per-ul-original|copies-per-ml-original):.+|mean-copies-per-ul-original|mean-copies-per-ml-original)$" },
+            "unit": {
+              "anyOf": [
+                { "enum": ["copies per µL of the original sample", "copies per mL of the original sample", "vector genomes per mL (vg/mL), DNase-treated", "genome copies per mL (GC/mL)"] },
+                { "type": "string", "pattern": "^vector genomes per mL \\(vg/mL\\), free DNA removed or blocked by .+$" }
+              ],
+              "description": "Per µL: copies per µL of the original sample. Per mL: copies per mL of the original sample; in titer mode, the label your free-DNA answer gives it, without the target. The target is in the target class declaration and in the tool section's label."
+            },
+            "display": { "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/c8Estimate" }, { "const": "undefined, not a measurement" }] }
+          },
+          "description": "Copies per µL and per mL of the original sample, for one well or for the mean of the ticked wells."
+        },
+        {
+          "properties": {
+            "id": { "pattern": "^lambda:.+$" },
+            "unit": { "type": "null" },
+            "display": { "oneOf": [{ "type": "null" }, { "type": "string", "pattern": "^(0|[1-9]\\.[0-9]{9}|[1-9][0-9]\\.[0-9]{8}|0\\.0*[1-9][0-9]{9})$" }] }
+          },
+          "description": "lambda, the mean number of copies per partition, shown to 10 significant figures in plain digits; 0 where no partition is positive."
+        },
+        {
+          "properties": {
+            "id": { "pattern": "^(p|template-ratio|step-factor|overall-factor):.+$" },
+            "unit": { "type": "null" },
+            "display": { "$ref": "#/$defs/c8Ratio" }
+          },
+          "description": "An exact ratio of entered values: the fraction of accepted partitions that are positive, the template ratio, a step's dilution factor, or the overall dilution factor."
+        },
+        {
+          "properties": {
+            "id": { "const": "highest-to-lowest" },
+            "unit": { "type": "null" },
+            "display": { "type": "string", "pattern": "^([0-9]{1,3}(,[0-9]{3})*(\\.[0-9]+)?|no finite value)$" }
+          },
+          "description": "In titer mode, the highest ticked well's result divided by the lowest, shown to 3 significant figures, with figures added one at a time where that equals your limit; \"no finite value\" where the lowest is 0."
+        }
+      ]
+    },
+    "c8Estimate": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\.[0-9]{6}|[1-9][0-9]\\.[0-9]{5}|[1-9][0-9]{2}\\.[0-9]{4}|[1-9],[0-9]{3}\\.[0-9]{3}|[1-9][0-9],[0-9]{3}\\.[0-9]{2}|[1-9][0-9]{2},[0-9]{3}\\.[0-9]|[1-9],[0-9]{3},[0-9]{3}|0\\.[1-9][0-9]{6}|0\\.0[1-9][0-9]{6}|0\\.00[1-9][0-9]{6}|[1-9]\\.[0-9]{6} × 10⁻?[¹²³⁴⁵⁶⁷⁸⁹][⁰¹²³⁴⁵⁶⁷⁸⁹]*)$",
+      "description": "An estimate shown to 7 significant figures, trailing zeros kept: in plain digits with thousands grouped by commas from 0.001 up to, but not including, 10,000,000, and otherwise as a number times a power of ten with a superscript exponent, for example 6.931472 × 10⁷. Zero is shown as 0."
+    },
+    "c8Ratio": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]{0,2}(,[0-9]{3})*|[0-9]{1,3}(,[0-9]{3})*\\.[0-9]*[1-9])$",
+      "description": "An exact ratio of entered values: a whole number in full, with thousands grouped by commas; otherwise 7 significant figures with trailing zeros dropped."
+    },
+    "c8Section": {
+      "type": "object",
+      "required": ["shape", "label", "headline", "recordLabel", "preparations", "wells", "mean"],
+      "additionalProperties": false,
+      "properties": {
+        "shape": {
+          "type": "object",
+          "required": ["name", "version"],
+          "additionalProperties": false,
+          "properties": {
+            "name": { "const": "Digital PCR Calculator" },
+            "version": { "const": "1.0.0" }
+          }
+        },
+        "label": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "required": ["unit", "target", "line"],
+              "additionalProperties": false,
+              "properties": {
+                "unit": { "$ref": "#/$defs/text", "description": "What the per-mL result is, as your declarations label it." },
+                "target": { "$ref": "#/$defs/text", "description": "The target: in titer mode the target class, otherwise the target name." },
+                "line": { "$ref": "#/$defs/textOrNull", "description": "The line shown with the headline where no DNase step was declared; otherwise null." }
+              }
+            }
+          ],
+          "description": "The result's label. Null where no result was computed."
+        },
+        "headline": { "$ref": "#/$defs/textOrNull", "description": "In titer mode, the headline label with its target; null in the base mode." },
+        "recordLabel": { "$ref": "#/$defs/textOrNull", "description": "In titer mode, the one-line label that travels with the number; null in the base mode." },
+        "preparations": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 6,
+          "items": {
+            "type": "object",
+            "required": ["name", "dilution", "inputs", "results"],
+            "additionalProperties": false,
+            "properties": {
+              "name": { "$ref": "#/$defs/text", "description": "The preparation's name: one dilution of your sample and the reaction it went into." },
+              "dilution": { "$ref": "#/$defs/id", "description": "The id of its dilution declaration." },
+              "inputs": { "$ref": "#/$defs/idList", "description": "Its entries: total, sample, master mix where filled, and the dilution steps or factor." },
+              "results": { "$ref": "#/$defs/idList", "description": "Its template ratio, step factors and overall factor; empty where no result was computed." }
+            }
+          },
+          "description": "Each preparation, in the order entered. One analysis holds at most 6."
+        },
+        "wells": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "preparation", "inMean", "status", "inputs", "results", "flags"],
+            "additionalProperties": false,
+            "properties": {
+              "name": { "$ref": "#/$defs/text", "description": "The well's label, as you entered it." },
+              "preparation": { "$ref": "#/$defs/text", "description": "The preparation it belongs to." },
+              "inMean": { "type": "boolean", "description": "Whether you ticked it for the mean." },
+              "status": { "enum": ["computed", "undefined", "not-computed"], "description": "computed; undefined, where every accepted partition is positive; or not-computed, where no result was computed for the analysis." },
+              "inputs": { "$ref": "#/$defs/idList", "description": "Its positive and accepted partition counts." },
+              "results": { "$ref": "#/$defs/idList", "description": "Its results, in the order of the calculation." },
+              "flags": { "type": "array", "items": { "type": "string", "pattern": "^FL-0[1-9]$" }, "description": "The flags that name this well." }
+            }
+          },
+          "description": "Each well, in the order entered."
+        },
+        "mean": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "required": ["status", "words", "sentence", "wells", "preparations", "notIncluded", "results"],
+              "additionalProperties": false,
+              "properties": {
+                "status": { "enum": ["computed", "withheld"] },
+                "words": { "const": "arithmetic mean of each ticked well's result" },
+                "sentence": { "$ref": "#/$defs/textOrNull", "description": "The sentence the page shows beside a computed mean; null where it is withheld." },
+                "wells": { "type": "array", "minItems": 2, "items": { "$ref": "#/$defs/text" }, "description": "The ticked wells, in listed order." },
+                "preparations": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/text" }, "description": "The preparations those wells belong to." },
+                "notIncluded": { "type": "array", "items": { "$ref": "#/$defs/text" }, "description": "The wells not ticked, which stay in the record." },
+                "results": { "$ref": "#/$defs/idList", "description": "The mean per µL and per mL." }
+              }
+            }
+          ],
+          "description": "The mean of the ticked wells, or null where fewer than two wells are ticked."
+        }
+      },
+      "description": "The Digital PCR Calculator's section: its preparations and wells, which entries and results belong to each, the label, and the mean."
+    }
+  }
+}

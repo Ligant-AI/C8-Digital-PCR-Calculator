@@ -1,0 +1,1217 @@
+{
+  "format": {
+    "name": "ligant-benchtools-record",
+    "version": "1.0.0",
+    "schema": "https://benchtools.ligant.ai/digital-pcr-calculator/schema/ligant-benchtools-record-1.0.0.schema.json"
+  },
+  "madeWith": {
+    "suiteId": "C8",
+    "name": "Ligant · Digital PCR Calculator",
+    "address": "https://benchtools.ligant.ai/digital-pcr-calculator/",
+    "toolVersion": "1.0.0",
+    "engineVersion": "1.0.0",
+    "engineCode": "https://github.com/Ligant-AI/C8-Digital-PCR-Calculator/tree/engine-v1.0.0",
+    "orderOfEvaluation": {
+      "version": 1,
+      "words": "order of evaluation 1"
+    }
+  },
+  "date": "2026-10-18",
+  "statements": {
+    "scope": "For data from droplet and chamber-based digital PCR instruments, using the partition volume you declare. The positive and accepted partitions are the counts your instrument's software gives: this tool does not call partitions positive or negative, or set a threshold. Original sample: the material before the first dilution you entered, for example your vector lot or your DNA extract. Titer mode is for DNA-genome vector lots, such as AAV. It does not cover RNA-genome vectors measured by RT-ddPCR, such as lentiviral lots.",
+    "researchUse": "Research use only. Not qualified for GxP decision-making.",
+    "citation": "Modi, A.B. (2026). Digital PCR Calculator (v1.0.0) [Computer software]. Ligant AI Incorporated. benchtools.ligant.ai/digital-pcr-calculator/",
+    "doi": null
+  },
+  "precision": {
+    "display": "Results are shown to 7 significant figures, and lambda to 10, so that you can follow the arithmetic by hand. The number of digits is not the precision of the measurement, which this release does not calculate; the counts beside each result show how many partitions it rests on. Values of 10 million or more are written in scientific notation.",
+    "rounding": "The tool rounds to the digits shown only for display. Every later step uses the unrounded value, held at the computer's full precision of about 16 significant digits, which is a limit of the arithmetic, not of the measurement. Multiplying the shown values by hand can therefore differ from the result in the last digits."
+  },
+  "outcome": {
+    "status": "result",
+    "words": "A result was computed.",
+    "missing": [],
+    "refusals": [],
+    "notSupported": [],
+    "message": null
+  },
+  "declarations": [
+    {
+      "id": "mode",
+      "label": "Titer mode",
+      "of": null,
+      "value": "titer",
+      "text": "on",
+      "unit": null,
+      "basis": {
+        "kind": "user",
+        "words": "user's own",
+        "constant": null
+      }
+    },
+    {
+      "id": "data-entry",
+      "label": "How will you enter the counts?",
+      "of": null,
+      "value": "typed",
+      "text": "Type them into the table",
+      "unit": null,
+      "basis": {
+        "kind": "user",
+        "words": "user's own",
+        "constant": null
+      }
+    },
+    {
+      "id": "decimal-separator",
+      "label": "Decimal separator",
+      "of": null,
+      "value": ".",
+      "text": "point (1.5)",
+      "unit": null,
+      "basis": {
+        "kind": "tool-rule",
+        "words": "Typed numbers use a full stop as the decimal separator.",
+        "constant": null
+      }
+    },
+    {
+      "id": "partition-volume-source",
+      "label": "Partition volume source",
+      "of": null,
+      "value": "user",
+      "text": "user's own",
+      "unit": null,
+      "basis": {
+        "kind": "user",
+        "words": "user's own",
+        "constant": null
+      }
+    },
+    {
+      "id": "instrument",
+      "label": "Instrument and software version",
+      "of": null,
+      "value": null,
+      "text": "example instrument, software 1.0",
+      "unit": null,
+      "basis": {
+        "kind": "user",
+        "words": "user's own",
+        "constant": null
+      }
+    },
+    {
+      "id": "target-name",
+      "label": "Target name",
+      "of": null,
+      "value": null,
+      "text": "ITR2 assay",
+      "unit": null,
+      "basis": {
+        "kind": "user",
+        "words": "user's own",
+        "constant": null
+      }
+    },
+    {
+      "id": "dilution:P1",
+      "label": "Dilution before PCR",
+      "of": "P1",
+      "value": "steps",
+      "text": "Dilution steps",
+      "unit": null,
+      "basis": {
+        "kind": "user",
+        "words": "user's own",
+        "constant": null
+      }
+    },
+    {
+      "id": "free-dna",
+      "label": "Free DNA removed before PCR",
+      "of": null,
+      "value": "yes",
+      "text": "Yes, DNase-treated",
+      "unit": null,
+      "basis": {
+        "kind": "user",
+        "words": "user's own",
+        "constant": null
+      }
+    },
+    {
+      "id": "capsid-opening",
+      "label": "Capsid opening (lysis) before PCR",
+      "of": null,
+      "value": "proteinase-k",
+      "text": "Proteinase K",
+      "unit": null,
+      "basis": {
+        "kind": "user",
+        "words": "user's own",
+        "constant": null
+      }
+    },
+    {
+      "id": "target-class",
+      "label": "Target class",
+      "of": null,
+      "value": "itr",
+      "text": "ITR",
+      "unit": null,
+      "basis": {
+        "kind": "user",
+        "words": "user's own",
+        "constant": null
+      }
+    },
+    {
+      "id": "ratio-limit",
+      "label": "Your limit for highest ÷ lowest ticked well (optional)",
+      "of": null,
+      "value": "1.1",
+      "text": "1.1",
+      "unit": null,
+      "basis": {
+        "kind": "user",
+        "words": "user's own",
+        "constant": null
+      }
+    }
+  ],
+  "constants": [
+    {
+      "id": "poisson-relation",
+      "name": "Poisson relation",
+      "value": "lambda = −ln(1 − p), p = k ÷ n",
+      "unit": null,
+      "kind": "relation",
+      "status": "disclosed",
+      "basis": "Quan et al. 2018, section 2.1; the mapping of k and n is Ligant's.",
+      "appliesTo": "Every lambda",
+      "source": {
+        "citation": "Quan P-L, Sauzade M, Brouzes E. dPCR: A Technology Review. Sensors 2018;18(4):1271, section 2.1",
+        "url": null,
+        "dateRead": null,
+        "quotes": [
+          "the ratio of positive partitions k (containing some target sequences) over the total number of partitions n is sufficient to predict the initial concentration of the target sequence in the sample with λ=−ln(1− k/n)."
+        ],
+        "tableVersion": null,
+        "note": null
+      },
+      "labelledAs": "Ligant's mapping: k = positive partitions; n = accepted partitions."
+    },
+    {
+      "id": "copies-per-reaction-relation",
+      "name": "Copies per µL of reaction",
+      "value": "lambda ÷ Vd",
+      "unit": null,
+      "kind": "relation",
+      "status": "derived",
+      "basis": "Derivation: lambda is the mean number of copies per partition, and each partition holds Vd µL, so copies per µL of reaction = lambda ÷ Vd.",
+      "appliesTo": "Every copies per µL of reaction, and every value computed from it",
+      "source": null,
+      "labelledAs": null
+    },
+    {
+      "id": "template-ratio-relation",
+      "name": "Template ratio",
+      "value": "R ÷ V, formed first",
+      "unit": null,
+      "kind": "relation",
+      "status": "derived",
+      "basis": "Derivation: the sample is mixed into the whole reaction, so the sample's concentration is the reaction's concentration times total ÷ sample.",
+      "appliesTo": "Each preparation's template ratio, and every value computed from it",
+      "source": null,
+      "labelledAs": "Ligant's reading: Addgene's titer protocol divides by the volume of virus in the reaction mix. Reading its R and V as the loaded volume and the sample in it gives 20 ÷ 4 = 25 ÷ 5 = 5, the same ratio as total ÷ sample."
+    },
+    {
+      "id": "dilution-factor-relation",
+      "name": "Dilution factor",
+      "value": "total ÷ volume in per step; product in bench order",
+      "unit": null,
+      "kind": "relation",
+      "status": "disclosed",
+      "basis": "Definition.",
+      "appliesTo": "Each dilution step's factor and each preparation's overall factor",
+      "source": null,
+      "labelledAs": null
+    },
+    {
+      "id": "ul-per-ml",
+      "name": "µL per mL",
+      "value": "1000",
+      "unit": null,
+      "kind": "constant",
+      "status": "disclosed",
+      "basis": "Unit definition.",
+      "appliesTo": "Every per-mL value",
+      "source": null,
+      "labelledAs": null
+    },
+    {
+      "id": "order-of-evaluation",
+      "name": "Order of evaluation",
+      "value": "Version 1, nine steps",
+      "unit": null,
+      "kind": "convention",
+      "status": "disclosed",
+      "basis": "So that two results can be shown to come from the same arithmetic.",
+      "appliesTo": "Every result",
+      "source": null,
+      "labelledAs": null
+    },
+    {
+      "id": "unit-conversion",
+      "name": "Unit conversion",
+      "value": "Decimal-point shift on the entered text: nL 3, pL 6 places",
+      "unit": null,
+      "kind": "convention",
+      "status": "disclosed",
+      "basis": "Never by a floating-point multiply or divide.",
+      "appliesTo": "The partition volume, where entered in nL or pL",
+      "source": null,
+      "labelledAs": null
+    },
+    {
+      "id": "partition-volume-rule",
+      "name": "Partition volume",
+      "value": "Yours, no default; or inserted from the published values",
+      "unit": null,
+      "kind": "convention",
+      "status": "disclosed",
+      "basis": "This tool cannot know the value for your instrument.",
+      "appliesTo": "The partition volume, and every value from copies per µL of reaction onward",
+      "source": null,
+      "labelledAs": null
+    },
+    {
+      "id": "undefined-result",
+      "name": "Undefined result",
+      "value": "p = 1",
+      "unit": null,
+      "kind": "threshold",
+      "status": "disclosed",
+      "basis": "Definitional: −ln(0) is not finite.",
+      "appliesTo": "Each well where every accepted partition is positive",
+      "source": null,
+      "labelledAs": null
+    },
+    {
+      "id": "zero-result",
+      "name": "Zero result",
+      "value": "k = 0 gives 0, displayed \"0\"",
+      "unit": null,
+      "kind": "threshold",
+      "status": "disclosed",
+      "basis": "Definitional.",
+      "appliesTo": "Each well with no positive partitions",
+      "source": null,
+      "labelledAs": null
+    },
+    {
+      "id": "refuse-positive-above-accepted",
+      "name": "Positive above accepted",
+      "value": "Refused",
+      "unit": null,
+      "kind": "threshold",
+      "status": "disclosed",
+      "basis": "Definitional: positives are part of the accepted.",
+      "appliesTo": "Each well's counts",
+      "source": null,
+      "labelledAs": null
+    },
+    {
+      "id": "refuse-sample-not-less-than-total",
+      "name": "Sample not less than total",
+      "value": "Refused",
+      "unit": null,
+      "kind": "threshold",
+      "status": "disclosed",
+      "basis": "The total includes the master mix as well as the sample.",
+      "appliesTo": "Each preparation's total and sample volumes",
+      "source": null,
+      "labelledAs": null
+    },
+    {
+      "id": "refuse-total-below-mix-plus-sample",
+      "name": "Total below master mix plus sample",
+      "value": "Refused; equality accepted",
+      "unit": null,
+      "kind": "threshold",
+      "status": "disclosed",
+      "basis": "The total must include the sample.",
+      "appliesTo": "Each preparation where the master mix is entered",
+      "source": null,
+      "labelledAs": null
+    },
+    {
+      "id": "refuse-zero-or-fractional",
+      "name": "Accepted 0, fractional counts, zero volumes",
+      "value": "Refused",
+      "unit": null,
+      "kind": "threshold",
+      "status": "disclosed",
+      "basis": "With no accepted partitions there is nothing to count from.",
+      "appliesTo": "Every count and every volume",
+      "source": null,
+      "labelledAs": null
+    },
+    {
+      "id": "refuse-concentrating-step",
+      "name": "Dilution step total below its volume in; one overall factor below 1",
+      "value": "Refused",
+      "unit": null,
+      "kind": "threshold",
+      "status": "disclosed",
+      "basis": "The total includes the volume in; a dilution factor is 1 or more.",
+      "appliesTo": "Each dilution step, and a typed overall factor",
+      "source": null,
+      "labelledAs": null
+    },
+    {
+      "id": "flag-factor-one-step",
+      "name": "Factor-1 step",
+      "value": "Flagged",
+      "unit": null,
+      "kind": "threshold",
+      "status": "disclosed",
+      "basis": "This step does not dilute (factor 1).",
+      "appliesTo": "Each dilution step",
+      "source": null,
+      "labelledAs": null
+    },
+    {
+      "id": "your-own-limits",
+      "name": "Expected accepted partitions, ratio limit, working range",
+      "value": "Yours, optional, no default",
+      "unit": null,
+      "kind": "convention",
+      "status": "disclosed",
+      "basis": "Flags compare only against a value you declare.",
+      "appliesTo": "The expected accepted partitions, the highest-to-lowest limit and the working range, where you declare them",
+      "source": null,
+      "labelledAs": null
+    },
+    {
+      "id": "mean-relation",
+      "name": "Mean of ticked wells",
+      "value": "Arithmetic mean of each ticked well's result, in listed order",
+      "unit": null,
+      "kind": "relation",
+      "status": "disclosed",
+      "basis": "It is not a result from the wells' counts added together.",
+      "appliesTo": "The mean of the ticked wells, per µL and per mL",
+      "source": null,
+      "labelledAs": null
+    },
+    {
+      "id": "analysis-limits",
+      "name": "Limits",
+      "value": "6 preparations per analysis; 8 wells and 6 steps per preparation",
+      "unit": null,
+      "kind": "limit",
+      "status": "disclosed",
+      "basis": "Product limits, not science.",
+      "appliesTo": "The whole analysis",
+      "source": null,
+      "labelledAs": null
+    },
+    {
+      "id": "displayed-precision",
+      "name": "Displayed precision",
+      "value": "7 significant figures; lambda 10",
+      "unit": null,
+      "kind": "convention",
+      "status": "disclosed",
+      "basis": "Shown so that you can follow the arithmetic by hand.",
+      "appliesTo": "Every display string",
+      "source": null,
+      "labelledAs": null
+    },
+    {
+      "id": "rounding-rule",
+      "name": "Rounding",
+      "value": "Half away from zero on the exact binary value, once, for display",
+      "unit": null,
+      "kind": "convention",
+      "status": "disclosed",
+      "basis": "No intermediate value is rounded to display precision; each is carried as a double.",
+      "appliesTo": "Every display string",
+      "source": null,
+      "labelledAs": null
+    },
+    {
+      "id": "lambda-evaluation",
+      "name": "Lambda evaluation form",
+      "value": "−log1p(−p), the same quantity as −ln(1 − p), which the page writes",
+      "unit": null,
+      "kind": "convention",
+      "status": "disclosed",
+      "basis": "−log1p(−p) gives the same quantity as −ln(1 − p) and keeps its last digits when p is small. With 1 positive partition in 10,000,000, −ln(1 − p) is wrong in the 10th significant figure, a figure the page shows.",
+      "appliesTo": "Every lambda",
+      "source": null,
+      "labelledAs": null
+    },
+    {
+      "id": "agreement-between-implementations",
+      "name": "Agreement between implementations",
+      "value": "Displayed values, statuses, refusals, flags and labels identical; unrounded values within a relative difference of 1e-15",
+      "unit": null,
+      "kind": "convention",
+      "status": "characterised",
+      "basis": "Tested for this engine version: an independent reimplementation and independently written expected values agree with this engine within this bound.",
+      "appliesTo": "Every result",
+      "source": null,
+      "labelledAs": null
+    }
+  ],
+  "assumptions": [
+    {
+      "assumption": "Partitions are of equal volume, the declared Vd, and targets are distributed among them at random.",
+      "appliesTo": "Every lambda",
+      "status": "disclosed"
+    },
+    {
+      "assumption": "The positive and accepted counts are from the same well and target, after your threshold.",
+      "appliesTo": "Every result",
+      "status": "disclosed"
+    },
+    {
+      "assumption": "The declared volumes are those pipetted.",
+      "appliesTo": "Every result",
+      "status": "disclosed"
+    },
+    {
+      "assumption": "The sample is uniformly mixed into the reaction, so the loaded or partitioned part has the reaction's concentration.",
+      "appliesTo": "Steps 5 to 8",
+      "status": "disclosed"
+    },
+    {
+      "assumption": "Every preparation in one analysis comes from the same original sample.",
+      "appliesTo": "Every mean across preparations",
+      "status": "disclosed"
+    }
+  ],
+  "inputs": [
+    {
+      "id": "partition-volume",
+      "label": "Partition volume",
+      "of": null,
+      "entered": "1",
+      "unit": "nL",
+      "converted": {
+        "text": "0.001",
+        "unit": "µL",
+        "unrounded": 0.001
+      },
+      "restsOn": [
+        "partition-volume-source",
+        "unit-conversion"
+      ]
+    },
+    {
+      "id": "total:P1",
+      "label": "Total volume of the reaction after the sample (template) is added",
+      "of": "P1",
+      "entered": "25",
+      "unit": "µL",
+      "converted": null,
+      "restsOn": []
+    },
+    {
+      "id": "sample:P1",
+      "label": "Volume of sample (template) added to that reaction",
+      "of": "P1",
+      "entered": "5",
+      "unit": "µL",
+      "converted": null,
+      "restsOn": []
+    },
+    {
+      "id": "step-in:P1 step 1",
+      "label": "Volume in (µL)",
+      "of": "P1 step 1",
+      "entered": "1",
+      "unit": "µL",
+      "converted": null,
+      "restsOn": [
+        "dilution:P1"
+      ]
+    },
+    {
+      "id": "step-total:P1 step 1",
+      "label": "Total volume of this step (µL)",
+      "of": "P1 step 1",
+      "entered": "10",
+      "unit": "µL",
+      "converted": null,
+      "restsOn": [
+        "dilution:P1"
+      ]
+    },
+    {
+      "id": "positive:A1",
+      "label": "Positive partitions",
+      "of": "A1",
+      "entered": "15000",
+      "unit": null,
+      "converted": null,
+      "restsOn": []
+    },
+    {
+      "id": "accepted:A1",
+      "label": "Accepted partitions",
+      "of": "A1",
+      "entered": "20000",
+      "unit": null,
+      "converted": null,
+      "restsOn": []
+    },
+    {
+      "id": "positive:A2",
+      "label": "Positive partitions",
+      "of": "A2",
+      "entered": "14000",
+      "unit": null,
+      "converted": null,
+      "restsOn": []
+    },
+    {
+      "id": "accepted:A2",
+      "label": "Accepted partitions",
+      "of": "A2",
+      "entered": "20000",
+      "unit": null,
+      "converted": null,
+      "restsOn": []
+    },
+    {
+      "id": "positive:A3",
+      "label": "Positive partitions",
+      "of": "A3",
+      "entered": "16500",
+      "unit": null,
+      "converted": null,
+      "restsOn": []
+    },
+    {
+      "id": "accepted:A3",
+      "label": "Accepted partitions",
+      "of": "A3",
+      "entered": "20000",
+      "unit": null,
+      "converted": null,
+      "restsOn": []
+    }
+  ],
+  "results": [
+    {
+      "id": "template-ratio:P1",
+      "label": "Template ratio, total ÷ sample",
+      "of": "P1",
+      "unit": null,
+      "relation": "r = R ÷ V, the total reaction volume after the sample is added ÷ the volume of sample, formed first",
+      "working": "r = R ÷ V = 25 ÷ 5 = 5",
+      "status": "computed",
+      "unrounded": 5,
+      "display": "5",
+      "note": null,
+      "restsOn": [
+        "template-ratio-relation"
+      ]
+    },
+    {
+      "id": "step-factor:P1 step 1",
+      "label": "Dilution step 1, total ÷ volume in",
+      "of": "P1 step 1",
+      "unit": null,
+      "relation": "f = total volume of the step ÷ volume in",
+      "working": "f_1 = 10 ÷ 1 = 10",
+      "status": "computed",
+      "unrounded": 10,
+      "display": "10",
+      "note": null,
+      "restsOn": [
+        "dilution:P1",
+        "dilution-factor-relation"
+      ]
+    },
+    {
+      "id": "overall-factor:P1",
+      "label": "Overall dilution factor",
+      "of": "P1",
+      "unit": null,
+      "relation": "F = the product of the step factors, multiplied in bench order, first dilution first",
+      "working": "F = f_1 = 10",
+      "status": "computed",
+      "unrounded": 10,
+      "display": "10",
+      "note": null,
+      "restsOn": [
+        "dilution:P1",
+        "dilution-factor-relation"
+      ]
+    },
+    {
+      "id": "p:A1",
+      "label": "Fraction of accepted partitions that are positive",
+      "of": "A1",
+      "unit": null,
+      "relation": "p = k ÷ n, positive partitions ÷ accepted partitions",
+      "working": "p = k ÷ n = 15,000 ÷ 20,000 = 0.75",
+      "status": "computed",
+      "unrounded": 0.75,
+      "display": "0.75",
+      "note": null,
+      "restsOn": []
+    },
+    {
+      "id": "lambda:A1",
+      "label": "lambda, copies per partition",
+      "of": "A1",
+      "unit": null,
+      "relation": "lambda = −ln(1 − p)",
+      "working": "lambda = −ln(1 − p) = −ln(1 − 0.75) = 1.386294361",
+      "status": "computed",
+      "unrounded": 1.3862943611198906,
+      "display": "1.386294361",
+      "note": null,
+      "restsOn": [
+        "poisson-relation",
+        "lambda-evaluation"
+      ]
+    },
+    {
+      "id": "copies-per-ul-reaction:A1",
+      "label": "Copies per µL of reaction",
+      "of": "A1",
+      "unit": "copies per µL of reaction",
+      "relation": "c_rxn = lambda ÷ Vd, with Vd the partition volume in µL",
+      "working": "c_rxn = lambda ÷ Vd = 1.386294361 ÷ 0.001 = 1,386.294",
+      "status": "computed",
+      "unrounded": 1386.2943611198905,
+      "display": "1,386.294",
+      "note": null,
+      "restsOn": [
+        "partition-volume-source",
+        "instrument",
+        "target-name",
+        "free-dna",
+        "capsid-opening",
+        "target-class",
+        "copies-per-reaction-relation"
+      ]
+    },
+    {
+      "id": "copies-per-ul-diluted:A1",
+      "label": "Copies per µL of the diluted sample",
+      "of": "A1",
+      "unit": "copies per µL of the diluted sample",
+      "relation": "c_rxn × r",
+      "working": "c_rxn × r = 1,386.294 × 5 = 6,931.472",
+      "status": "computed",
+      "unrounded": 6931.471805599453,
+      "display": "6,931.472",
+      "note": null,
+      "restsOn": [
+        "partition-volume-source",
+        "instrument",
+        "target-name",
+        "free-dna",
+        "capsid-opening",
+        "target-class",
+        "copies-per-reaction-relation",
+        "template-ratio-relation"
+      ]
+    },
+    {
+      "id": "copies-per-ul-original:A1",
+      "label": "Copies per µL of the original sample",
+      "of": "A1",
+      "unit": "copies per µL of the original sample",
+      "relation": "(c_rxn × r) × F",
+      "working": "(c_rxn × r) × F = 6,931.472 × 10 = 69,314.72",
+      "status": "computed",
+      "unrounded": 69314.71805599453,
+      "display": "69,314.72",
+      "note": null,
+      "restsOn": [
+        "partition-volume-source",
+        "instrument",
+        "target-name",
+        "free-dna",
+        "capsid-opening",
+        "target-class",
+        "dilution:P1",
+        "copies-per-reaction-relation",
+        "template-ratio-relation",
+        "dilution-factor-relation"
+      ]
+    },
+    {
+      "id": "copies-per-ml-original:A1",
+      "label": "Copies per mL of the original sample",
+      "of": "A1",
+      "unit": "vector genomes per mL (vg/mL), DNase-treated",
+      "relation": "copies per µL of the original sample × 1000",
+      "working": "69,314.72 × 1000 = 6.931472 × 10⁷",
+      "status": "computed",
+      "unrounded": 69314718.05599453,
+      "display": "6.931472 × 10⁷",
+      "note": null,
+      "restsOn": [
+        "partition-volume-source",
+        "instrument",
+        "target-name",
+        "free-dna",
+        "capsid-opening",
+        "target-class",
+        "dilution:P1",
+        "copies-per-reaction-relation",
+        "template-ratio-relation",
+        "dilution-factor-relation",
+        "ul-per-ml"
+      ]
+    },
+    {
+      "id": "p:A2",
+      "label": "Fraction of accepted partitions that are positive",
+      "of": "A2",
+      "unit": null,
+      "relation": "p = k ÷ n, positive partitions ÷ accepted partitions",
+      "working": "p = k ÷ n = 14,000 ÷ 20,000 = 0.7",
+      "status": "computed",
+      "unrounded": 0.7,
+      "display": "0.7",
+      "note": null,
+      "restsOn": []
+    },
+    {
+      "id": "lambda:A2",
+      "label": "lambda, copies per partition",
+      "of": "A2",
+      "unit": null,
+      "relation": "lambda = −ln(1 − p)",
+      "working": "lambda = −ln(1 − p) = −ln(1 − 0.7) = 1.203972804",
+      "status": "computed",
+      "unrounded": 1.203972804325936,
+      "display": "1.203972804",
+      "note": null,
+      "restsOn": [
+        "poisson-relation",
+        "lambda-evaluation"
+      ]
+    },
+    {
+      "id": "copies-per-ul-reaction:A2",
+      "label": "Copies per µL of reaction",
+      "of": "A2",
+      "unit": "copies per µL of reaction",
+      "relation": "c_rxn = lambda ÷ Vd, with Vd the partition volume in µL",
+      "working": "c_rxn = lambda ÷ Vd = 1.203972804 ÷ 0.001 = 1,203.973",
+      "status": "computed",
+      "unrounded": 1203.9728043259358,
+      "display": "1,203.973",
+      "note": null,
+      "restsOn": [
+        "partition-volume-source",
+        "instrument",
+        "target-name",
+        "free-dna",
+        "capsid-opening",
+        "target-class",
+        "copies-per-reaction-relation"
+      ]
+    },
+    {
+      "id": "copies-per-ul-diluted:A2",
+      "label": "Copies per µL of the diluted sample",
+      "of": "A2",
+      "unit": "copies per µL of the diluted sample",
+      "relation": "c_rxn × r",
+      "working": "c_rxn × r = 1,203.973 × 5 = 6,019.864",
+      "status": "computed",
+      "unrounded": 6019.864021629679,
+      "display": "6,019.864",
+      "note": null,
+      "restsOn": [
+        "partition-volume-source",
+        "instrument",
+        "target-name",
+        "free-dna",
+        "capsid-opening",
+        "target-class",
+        "copies-per-reaction-relation",
+        "template-ratio-relation"
+      ]
+    },
+    {
+      "id": "copies-per-ul-original:A2",
+      "label": "Copies per µL of the original sample",
+      "of": "A2",
+      "unit": "copies per µL of the original sample",
+      "relation": "(c_rxn × r) × F",
+      "working": "(c_rxn × r) × F = 6,019.864 × 10 = 60,198.64",
+      "status": "computed",
+      "unrounded": 60198.640216296786,
+      "display": "60,198.64",
+      "note": null,
+      "restsOn": [
+        "partition-volume-source",
+        "instrument",
+        "target-name",
+        "free-dna",
+        "capsid-opening",
+        "target-class",
+        "dilution:P1",
+        "copies-per-reaction-relation",
+        "template-ratio-relation",
+        "dilution-factor-relation"
+      ]
+    },
+    {
+      "id": "copies-per-ml-original:A2",
+      "label": "Copies per mL of the original sample",
+      "of": "A2",
+      "unit": "vector genomes per mL (vg/mL), DNase-treated",
+      "relation": "copies per µL of the original sample × 1000",
+      "working": "60,198.64 × 1000 = 6.019864 × 10⁷",
+      "status": "computed",
+      "unrounded": 60198640.216296785,
+      "display": "6.019864 × 10⁷",
+      "note": null,
+      "restsOn": [
+        "partition-volume-source",
+        "instrument",
+        "target-name",
+        "free-dna",
+        "capsid-opening",
+        "target-class",
+        "dilution:P1",
+        "copies-per-reaction-relation",
+        "template-ratio-relation",
+        "dilution-factor-relation",
+        "ul-per-ml"
+      ]
+    },
+    {
+      "id": "p:A3",
+      "label": "Fraction of accepted partitions that are positive",
+      "of": "A3",
+      "unit": null,
+      "relation": "p = k ÷ n, positive partitions ÷ accepted partitions",
+      "working": "p = k ÷ n = 16,500 ÷ 20,000 = 0.825",
+      "status": "computed",
+      "unrounded": 0.825,
+      "display": "0.825",
+      "note": null,
+      "restsOn": []
+    },
+    {
+      "id": "lambda:A3",
+      "label": "lambda, copies per partition",
+      "of": "A3",
+      "unit": null,
+      "relation": "lambda = −ln(1 − p)",
+      "working": "lambda = −ln(1 − p) = −ln(1 − 0.825) = 1.742969305",
+      "status": "computed",
+      "unrounded": 1.7429693050586228,
+      "display": "1.742969305",
+      "note": null,
+      "restsOn": [
+        "poisson-relation",
+        "lambda-evaluation"
+      ]
+    },
+    {
+      "id": "copies-per-ul-reaction:A3",
+      "label": "Copies per µL of reaction",
+      "of": "A3",
+      "unit": "copies per µL of reaction",
+      "relation": "c_rxn = lambda ÷ Vd, with Vd the partition volume in µL",
+      "working": "c_rxn = lambda ÷ Vd = 1.742969305 ÷ 0.001 = 1,742.969",
+      "status": "computed",
+      "unrounded": 1742.9693050586227,
+      "display": "1,742.969",
+      "note": null,
+      "restsOn": [
+        "partition-volume-source",
+        "instrument",
+        "target-name",
+        "free-dna",
+        "capsid-opening",
+        "target-class",
+        "copies-per-reaction-relation"
+      ]
+    },
+    {
+      "id": "copies-per-ul-diluted:A3",
+      "label": "Copies per µL of the diluted sample",
+      "of": "A3",
+      "unit": "copies per µL of the diluted sample",
+      "relation": "c_rxn × r",
+      "working": "c_rxn × r = 1,742.969 × 5 = 8,714.847",
+      "status": "computed",
+      "unrounded": 8714.846525293113,
+      "display": "8,714.847",
+      "note": null,
+      "restsOn": [
+        "partition-volume-source",
+        "instrument",
+        "target-name",
+        "free-dna",
+        "capsid-opening",
+        "target-class",
+        "copies-per-reaction-relation",
+        "template-ratio-relation"
+      ]
+    },
+    {
+      "id": "copies-per-ul-original:A3",
+      "label": "Copies per µL of the original sample",
+      "of": "A3",
+      "unit": "copies per µL of the original sample",
+      "relation": "(c_rxn × r) × F",
+      "working": "(c_rxn × r) × F = 8,714.847 × 10 = 87,148.47",
+      "status": "computed",
+      "unrounded": 87148.46525293113,
+      "display": "87,148.47",
+      "note": null,
+      "restsOn": [
+        "partition-volume-source",
+        "instrument",
+        "target-name",
+        "free-dna",
+        "capsid-opening",
+        "target-class",
+        "dilution:P1",
+        "copies-per-reaction-relation",
+        "template-ratio-relation",
+        "dilution-factor-relation"
+      ]
+    },
+    {
+      "id": "copies-per-ml-original:A3",
+      "label": "Copies per mL of the original sample",
+      "of": "A3",
+      "unit": "vector genomes per mL (vg/mL), DNase-treated",
+      "relation": "copies per µL of the original sample × 1000",
+      "working": "87,148.47 × 1000 = 8.714847 × 10⁷",
+      "status": "computed",
+      "unrounded": 87148465.25293113,
+      "display": "8.714847 × 10⁷",
+      "note": null,
+      "restsOn": [
+        "partition-volume-source",
+        "instrument",
+        "target-name",
+        "free-dna",
+        "capsid-opening",
+        "target-class",
+        "dilution:P1",
+        "copies-per-reaction-relation",
+        "template-ratio-relation",
+        "dilution-factor-relation",
+        "ul-per-ml"
+      ]
+    },
+    {
+      "id": "mean-copies-per-ul-original",
+      "label": "Mean copies per µL of the original sample",
+      "of": null,
+      "unit": "copies per µL of the original sample",
+      "relation": "arithmetic mean of each ticked well's result, summed in listed order and divided by the number of ticked wells",
+      "working": "(69,314.72 + 60,198.64) ÷ 2 = 64,756.68",
+      "status": "computed",
+      "unrounded": 64756.679136145656,
+      "display": "64,756.68",
+      "note": null,
+      "restsOn": [
+        "partition-volume-source",
+        "instrument",
+        "target-name",
+        "free-dna",
+        "capsid-opening",
+        "target-class",
+        "dilution:P1",
+        "mean-relation"
+      ]
+    },
+    {
+      "id": "mean-copies-per-ml-original",
+      "label": "Mean copies per mL of the original sample",
+      "of": null,
+      "unit": "vector genomes per mL (vg/mL), DNase-treated",
+      "relation": "mean copies per µL of the original sample × 1000",
+      "working": "64,756.68 × 1000 = 6.475668 × 10⁷",
+      "status": "computed",
+      "unrounded": 64756679.13614566,
+      "display": "6.475668 × 10⁷",
+      "note": null,
+      "restsOn": [
+        "partition-volume-source",
+        "instrument",
+        "target-name",
+        "free-dna",
+        "capsid-opening",
+        "target-class",
+        "dilution:P1",
+        "mean-relation",
+        "ul-per-ml"
+      ]
+    },
+    {
+      "id": "highest-to-lowest",
+      "label": "Highest ÷ lowest ticked well",
+      "of": null,
+      "unit": null,
+      "relation": "highest ticked well's copies per µL of the original sample ÷ the lowest, on unrounded values",
+      "working": "69,314.72 ÷ 60,198.64 = 1.15",
+      "status": "computed",
+      "unrounded": 1.1514332849868902,
+      "display": "1.15",
+      "note": null,
+      "restsOn": [
+        "ratio-limit"
+      ]
+    }
+  ],
+  "flags": [
+    {
+      "code": "FL-08",
+      "words": [
+        "Highest to lowest ticked well is 1.15-fold (A1 against A2), above the 1.1-fold you set. Check those wells before you use the mean."
+      ],
+      "names": [
+        "A1",
+        "A2"
+      ],
+      "results": [
+        "highest-to-lowest"
+      ]
+    }
+  ],
+  "tool": {
+    "shape": {
+      "name": "Digital PCR Calculator",
+      "version": "1.0.0"
+    },
+    "label": {
+      "unit": "vector genomes per mL (vg/mL), DNase-treated",
+      "target": "ITR",
+      "line": null
+    },
+    "headline": "vector genomes per mL (vg/mL), DNase-treated, ITR target",
+    "recordLabel": "vg/mL, DNase-treated, ITR target; capsids opened with proteinase K; mean of 2 wells",
+    "preparations": [
+      {
+        "name": "P1",
+        "dilution": "dilution:P1",
+        "inputs": [
+          "total:P1",
+          "sample:P1",
+          "step-in:P1 step 1",
+          "step-total:P1 step 1"
+        ],
+        "results": [
+          "template-ratio:P1",
+          "step-factor:P1 step 1",
+          "overall-factor:P1"
+        ]
+      }
+    ],
+    "wells": [
+      {
+        "name": "A1",
+        "preparation": "P1",
+        "inMean": true,
+        "status": "computed",
+        "inputs": [
+          "positive:A1",
+          "accepted:A1"
+        ],
+        "results": [
+          "p:A1",
+          "lambda:A1",
+          "template-ratio:P1",
+          "step-factor:P1 step 1",
+          "overall-factor:P1",
+          "copies-per-ul-reaction:A1",
+          "copies-per-ul-diluted:A1",
+          "copies-per-ul-original:A1",
+          "copies-per-ml-original:A1"
+        ],
+        "flags": [
+          "FL-08"
+        ]
+      },
+      {
+        "name": "A2",
+        "preparation": "P1",
+        "inMean": true,
+        "status": "computed",
+        "inputs": [
+          "positive:A2",
+          "accepted:A2"
+        ],
+        "results": [
+          "p:A2",
+          "lambda:A2",
+          "template-ratio:P1",
+          "step-factor:P1 step 1",
+          "overall-factor:P1",
+          "copies-per-ul-reaction:A2",
+          "copies-per-ul-diluted:A2",
+          "copies-per-ul-original:A2",
+          "copies-per-ml-original:A2"
+        ],
+        "flags": [
+          "FL-08"
+        ]
+      },
+      {
+        "name": "A3",
+        "preparation": "P1",
+        "inMean": false,
+        "status": "computed",
+        "inputs": [
+          "positive:A3",
+          "accepted:A3"
+        ],
+        "results": [
+          "p:A3",
+          "lambda:A3",
+          "template-ratio:P1",
+          "step-factor:P1 step 1",
+          "overall-factor:P1",
+          "copies-per-ul-reaction:A3",
+          "copies-per-ul-diluted:A3",
+          "copies-per-ul-original:A3",
+          "copies-per-ml-original:A3"
+        ],
+        "flags": []
+      }
+    ],
+    "mean": {
+      "status": "computed",
+      "words": "arithmetic mean of each ticked well's result",
+      "sentence": "Mean of 2 wells: the average of each well's result. It is not a result from the wells' counts added together, which is close to it for wells that agree, can differ widely for wells that do not, and is not valid across different dilutions.",
+      "wells": [
+        "A1",
+        "A2"
+      ],
+      "preparations": [
+        "P1"
+      ],
+      "notIncluded": [
+        "A3"
+      ],
+      "results": [
+        "mean-copies-per-ul-original",
+        "mean-copies-per-ml-original"
+      ]
+    }
+  }
+}

@@ -1,0 +1,20 @@
+const PUBLIC_REPO = 'https://github.com/Ligant-AI/C8-Digital-PCR-Calculator';
+export const CONFIG = Object.freeze({
+    toolTitle: 'Digital PCR Calculator',
+    toolId: 'C8',
+    productLine: 'Ligant Bench Tools',
+    publisher: 'Ligant',
+    legalEntity: 'Ligant AI Incorporated',
+    version: '1.0.0',
+    releaseDate: '2026-10-18',
+    slug: 'digital-pcr-calculator',
+    publicBase: 'https://benchtools.ligant.ai/',
+    repositoryUrl: 'https://github.com/Ligant-AI/C8-Digital-PCR-Calculator',
+    publicRepoUrl: PUBLIC_REPO,
+    engineTagUrl: (version) => `${PUBLIC_REPO}/tree/engine-v${version}`,
+    doi: null,
+    citationAuthor: 'Modi, A.B.',
+    citationYear: '2026',
+    tagline: 'Digital PCR calculator for ddPCR and dPCR data: copies per µL of your original sample from positive and accepted partition counts, and a vg/mL or GC/mL titer in titer mode, for data from droplet and chamber-based digital PCR instruments, using the partition volume you declare. It shows its working.',
+    disclaimer: 'Research use only. Not qualified for GxP decision-making.',
+});

@@ -1,0 +1,17 @@
+# Citation metadata, read by GitHub ("Cite this repository") and by Zenodo.
+# At each release, set version and date-released; add the DOI once archived.
+cff-version: 1.2.0
+message: If you use this software, please cite it as below.
+type: software
+title: Digital PCR Calculator
+abstract: >-
+  Digital PCR calculator for ddPCR and dPCR data: copies per µL of your original sample from positive and accepted partition counts, and a vg/mL or GC/mL titer in titer mode, for data from droplet and chamber-based digital PCR instruments, using the partition volume you declare. It shows its working.
+authors:
+  - family-names: Modi
+    given-names: A.B.
+    affiliation: Ligant AI Incorporated
+version: v1.0.0
+date-released: 2026-10-21
+license: Apache-2.0
+repository-code: https://github.com/Ligant-AI/C8-Digital-PCR-Calculator
+url: https://benchtools.ligant.ai/digital-pcr-calculator/
