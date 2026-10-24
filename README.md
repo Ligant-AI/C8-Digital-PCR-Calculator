@@ -2,6 +2,8 @@
 
 Part of [Ligant Bench Tools](https://benchtools.ligant.ai/): free, open-source calculators for the laboratory bench. This repository holds the source of **Digital PCR Calculator** so you can download it and run it on your own computer. The hosted version is at https://benchtools.ligant.ai/digital-pcr-calculator/
 
+This repository contains the complete source needed to build and run the tool. Code comments and development history are not included.
+
 ## Research use only
 
 Research use only. Not qualified for GxP decision-making.
@@ -36,4 +38,4 @@ Apache License 2.0, see [LICENSE](LICENSE). The bundled fonts (Inter, IBM Plex M
 
 Short quotations from published papers and vendor documents (for example in src/ui/text.js and src/ui/published.js) are reproduced with attribution for reference. They remain the property of their authors or publishers and are not licensed under Apache-2.0.
 
-Digital PCR Calculator v1.0.0. © Ligant AI Incorporated.
+Digital PCR Calculator v1.1.0. © Ligant AI Incorporated.

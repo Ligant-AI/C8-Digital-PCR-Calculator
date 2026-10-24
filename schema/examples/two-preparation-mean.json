@@ -8,9 +8,9 @@
     "suiteId": "C8",
     "name": "Ligant · Digital PCR Calculator",
     "address": "https://benchtools.ligant.ai/digital-pcr-calculator/",
-    "toolVersion": "1.0.0",
-    "engineVersion": "1.0.0",
-    "engineCode": "https://github.com/Ligant-AI/C8-Digital-PCR-Calculator/tree/engine-v1.0.0",
+    "toolVersion": "1.1.0",
+    "engineVersion": "1.1.0",
+    "engineCode": "https://github.com/Ligant-AI/C8-Digital-PCR-Calculator/tree/engine-v1.1.0",
     "orderOfEvaluation": {
       "version": 1,
       "words": "order of evaluation 1"
@@ -20,7 +20,7 @@
   "statements": {
     "scope": "For data from droplet and chamber-based digital PCR instruments, using the partition volume you declare. The positive and accepted partitions are the counts your instrument's software gives: this tool does not call partitions positive or negative, or set a threshold. Original sample: the material before the first dilution you entered, for example your vector lot or your DNA extract.",
     "researchUse": "Research use only. Not qualified for GxP decision-making.",
-    "citation": "Modi, A.B. (2026). Digital PCR Calculator (v1.0.0) [Computer software]. Ligant AI Incorporated. benchtools.ligant.ai/digital-pcr-calculator/",
+    "citation": "Modi, A.B. (2026). Digital PCR Calculator (v1.1.0) [Computer software]. Ligant AI Incorporated. benchtools.ligant.ai/digital-pcr-calculator/",
     "doi": null
   },
   "precision": {
@@ -316,6 +316,18 @@
       "status": "disclosed",
       "basis": "With no accepted partitions there is nothing to count from.",
       "appliesTo": "Every count and every volume",
+      "source": null,
+      "labelledAs": null
+    },
+    {
+      "id": "refuse-accepted-above-ceiling",
+      "name": "Accepted partitions per well",
+      "value": "At most 90,000,000",
+      "unit": null,
+      "kind": "threshold",
+      "status": "derived",
+      "basis": "Derivation: p = k ÷ n is held as a double, which can differ from the exact ratio by up to 2^−54; lambda then differs by up to about 2^−54 × n ÷ (n − k), at most about 2^−54 × n. Up to 90,000,000 accepted partitions this stays below half a unit of the last figure of lambda shown; above it, the figures shown can be wrong.",
+      "appliesTo": "Each well's counts",
       "source": null,
       "labelledAs": null
     },
@@ -678,7 +690,7 @@
       "of": "B1",
       "unit": null,
       "relation": "lambda = −ln(1 − p)",
-      "working": "lambda = −ln(1 − p) = −ln(1 − 0.45) = 0.5978370008",
+      "working": "lambda = −ln(1 − p) = −ln(1 − (9,000 ÷ 20,000)) = 0.5978370008",
       "status": "computed",
       "unrounded": 0.5978370007556204,
       "display": "0.5978370008",
@@ -850,7 +862,7 @@
       "of": "B2",
       "unit": null,
       "relation": "lambda = −ln(1 − p)",
-      "working": "lambda = −ln(1 − p) = −ln(1 − 0.26) = 0.3011050928",
+      "working": "lambda = −ln(1 − p) = −ln(1 − (5,200 ÷ 20,000)) = 0.3011050928",
       "status": "computed",
       "unrounded": 0.3011050927839216,
       "display": "0.3011050928",

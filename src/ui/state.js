@@ -89,6 +89,7 @@ export function formProblems(state) {
 }
 const qty = (v) => (blank(v) ? null : { value: v, unit: UL });
 const orNull = (v) => (blank(v) ? null : v);
+const textOrNull = (v) => (blank(v) ? null : String(v).trim());
 export function caseOf(state) {
     const t = state.titre;
     const pv = state.pv;
@@ -99,8 +100,8 @@ export function caseOf(state) {
         mode: state.titer ? 'titre' : 'concentration',
         entry: state.entry,
         decimalSeparator: state.entry === 'pasted' ? state.paste.separator : null,
-        instrument: orNull(state.instrument),
-        targetName: orNull(state.target),
+        instrument: textOrNull(state.instrument),
+        targetName: textOrNull(state.target),
         partitionVolume: pvDeclared ? { value: pv.value, unit: orNull(pv.unit), source: pv.source } : null,
         preparations: state.preps.map((p) => ({
             prep: prepName(state, p),
@@ -118,8 +119,8 @@ export function caseOf(state) {
         })),
         expectedAccepted: orNull(state.expected),
         titre: state.titer ? {
-            dnase: t.dnase, dnaseText: orNull(t.dnaseText), lysis: t.lysis, lysisText: orNull(t.lysisText),
-            targetClass: t.targetClass, targetClassText: orNull(t.targetClassText),
+            dnase: t.dnase, dnaseText: textOrNull(t.dnaseText), lysis: t.lysis, lysisText: textOrNull(t.lysisText),
+            targetClass: t.targetClass, targetClassText: textOrNull(t.targetClassText),
             replicateRatio: orNull(t.ratio),
             reliableRange: blank(t.low) && blank(t.high) ? null : { low: orNull(t.low), high: orNull(t.high) },
         } : null,

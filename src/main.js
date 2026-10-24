@@ -1,9 +1,12 @@
 import '@ligant/bench-chrome/chrome.css';
 import { bindCopy } from '@ligant/bench-chrome';
-import { renderHeader, renderFooter } from './ui/chrome.js';
+import { renderHeader, renderFooter, renderColophon } from './ui/chrome.js';
+import { SCOPE_BOX } from './ui/text.js';
 import { start } from './ui/app.js';
 document.getElementById('site-header').innerHTML = renderHeader();
 const footer = document.getElementById('site-footer');
 footer.innerHTML = renderFooter();
 bindCopy(footer);
+document.getElementById('disclaimer').textContent = SCOPE_BOX;
+document.getElementById('colophon').innerHTML = renderColophon();
 start();

@@ -1,4 +1,4 @@
-import { renderHeader as suiteHeader, renderFooter as suiteFooter } from '@ligant/bench-chrome';
+import { renderHeader as suiteHeader, renderFooter as suiteFooter, markSvg, escapeHtml as esc } from '@ligant/bench-chrome';
 import { CONFIG } from '../config.js';
 import { RULED } from './text.js';
 export function renderHeader() {
@@ -7,6 +7,9 @@ export function renderHeader() {
 const citationTail = () => ` (v${CONFIG.version}) [Computer software]. ${CONFIG.legalEntity}. ${CONFIG.publicBase.replace('https://', '')}${CONFIG.slug}/`;
 export function citationText() {
     return `${CONFIG.citationAuthor} (${CONFIG.citationYear}). ${CONFIG.toolTitle}${citationTail()}`;
+}
+export function renderColophon() {
+    return `${markSvg({ size: 16 })}<span>${esc(CONFIG.publisher)} · ${esc(CONFIG.toolTitle)} v${esc(CONFIG.version)}</span>`;
 }
 export function renderFooter() {
     const tail = citationTail();

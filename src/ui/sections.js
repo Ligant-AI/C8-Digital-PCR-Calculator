@@ -1,5 +1,5 @@
 import { escapeHtml as esc } from '@ligant/bench-chrome';
-import { RULED, UI } from './text.js';
+import { RULED, RULED_1_1 as R, RULED_1_1_SECTIONS as S11, UI } from './text.js';
 import { CONFIG } from '../config.js';
 import { walkThrough } from './learn.js';
 export const SECTION_TEXT = Object.freeze({
@@ -12,7 +12,7 @@ export const SECTION_TEXT = Object.freeze({
         ['Sample preparations.', 'For each preparation, say whether the sample was diluted before PCR and enter each dilution step as the volume in and the total volume of the step. Then enter the total volume of the reaction after the sample is added, and the volume of sample in it.'],
         ['Partition counts per well.', 'Type each well\'s positive and accepted partitions, or paste a table and say which column is which. Choose each well\'s preparation, and tick the wells to include in the mean.'],
         ['Titer mode.', 'For a vector lot, switch titer mode on and answer its three questions.'],
-        ['Read the result.', 'It updates as you type. Anything missing or refused is named beside its field, with what to do.'],
+        ['Read the result.', `It updates as you type. Anything missing or refused is named beside its field, with what to do. ${S11.useOverview} ${S11.useSvg}`],
     ],
     howItWorksLead: 'Each well goes through the same nine steps, in this order, for every preparation.',
     steps: [
@@ -44,6 +44,7 @@ export const SECTION_TEXT = Object.freeze({
         ['Sample not less than total', 'Refused', 'The total includes the master mix as well as the sample.'],
         ['Total below master mix plus sample', 'Refused; equality accepted', 'The total must include the sample.'],
         ['Accepted 0, fractional counts, zero volumes', 'Refused', 'With no accepted partitions there is nothing to count from.'],
+        [R.ceilingName, R.ceilingValue, R.ceilingWhy],
         ['Dilution step total below its volume in; one overall factor below 1', 'Refused', 'The total includes the volume in; a dilution factor is 1 or more.'],
         ['Factor-1 step', 'Flagged', 'This step does not dilute (factor 1).'],
         ['Expected accepted partitions, ratio limit, working range', 'Yours, optional, no default', 'Flags compare only against a value you declare.'],
@@ -79,6 +80,7 @@ export const SECTION_TEXT = Object.freeze({
 const T = SECTION_TEXT;
 const p = (t) => `<p>${esc(t)}</p>`;
 const dot = (t) => (/[.!?"”]$/.test(t) ? t : `${t}.`);
+export const failureItems = () => RULED.failureClasses.map((t, i) => (i === 2 ? S11.failureItem3 : t));
 export function legendHtml() {
     return `<h4>${esc(UI.legendHeading)}</h4><p>${esc(T.flagsLead)}</p><table class="legend"><tbody>`
         + Object.entries(UI.flagLegend).map(([code, cond]) => `<tr id="legend-${code}"><td class="num">${code}</td><td>${esc(cond)}</td></tr>`).join('')
@@ -106,7 +108,7 @@ export function sectionsHtml() {
         + `<p class="cite">${esc(RULED.hindsonRef)}</p>`
         + `<p class="cite">${esc(RULED.corbisierRef)}</p>`
         + `<h3>${esc(s4)}</h3>${p(T.spreadsheetLead)}<ul>${T.spreadsheet.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>${p(RULED.rounding)}${p(T.spreadsheetMore)}`
-        + `<h3>${esc(s5)}</h3>${p(T.doesNot)}${p(T.notCovered)}${p(T.cannotDetect)}<ol>${RULED.failureClasses.map((t) => `<li>${esc(dot(t))}</li>`).join('')}</ol>`
+        + `<h3>${esc(s5)}</h3>${p(T.doesNot)}${p(T.notCovered)}${p(T.cannotDetect)}<ol>${failureItems().map((t) => `<li>${esc(dot(t))}</li>`).join('')}</ol>`
         + p(RULED.titerIntro) + p(RULED.twoTargets)
         + `<p class="trademarks">${esc(RULED.trademarks)}</p>`;
 }

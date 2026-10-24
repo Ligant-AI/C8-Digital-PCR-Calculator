@@ -1,6 +1,7 @@
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { COMPARED_ENGINE_VERSIONS } from '../src/ui/exports/register.js';
 const HERE = dirname(fileURLToPath(import.meta.url));
 const SCHEMA_FILE = 'ligant-benchtools-record-1.0.0.schema.json';
 const ROOT = [process.argv[2], HERE, join(HERE, '..')].filter(Boolean).find((d) => existsSync(join(d, SCHEMA_FILE)) && existsSync(join(d, 'examples')));
@@ -183,6 +184,13 @@ export function crossCheck(rec, rawText) {
         for (const x of (rec.inputs || []).filter((i) => /^(positive|accepted):/.test(i.id)))
             if (!(t.wells || []).some((w) => w.name === x.of))
                 errs.push(`input ${x.id}: no such well`);
+        const a = (rec.constants || []).find((x) => x && x.id === 'agreement-between-implementations');
+        if (COMPARED_ENGINE_VERSIONS.includes(rec.madeWith.engineVersion)) {
+            if (!a || a.status !== 'characterised' || a.appliesTo !== 'Every result')
+                errs.push('agreement row');
+        }
+        else if (a)
+            errs.push('agreement row for an engine version not compared');
     }
     return errs;
 }
@@ -229,9 +237,6 @@ for (const [f, rec] of Object.entries(records)) {
         errs.push('copies-per-reaction basis');
     if (!c('lambda-evaluation').basis.startsWith('−log1p(−p) gives the same quantity'))
         errs.push('lambda basis');
-    const a = c('agreement-between-implementations');
-    if (!a || a.status !== 'characterised' || a.appliesTo !== 'Every result')
-        errs.push('agreement row');
     const dl = (id) => (rec.declarations.find((d) => d.id === id) || {});
     if (dl('mode').label !== 'Titer mode' || dl('mode').text !== (titer ? 'on' : 'off'))
         errs.push('mode label or text');
@@ -318,6 +323,9 @@ const MUTANTS = [
     ['an unchosen unit written as empty text', 'built:incomplete', (r) => { r.inputs.find((i) => i.id === 'partition-volume').unit = ''; }],
     ['a blank declaration kept with empty text', 'built:incomplete', (r) => { r.declarations.push({ id: 'instrument', label: 'Instrument and software version', of: null, value: null, text: '', unit: null, basis: { kind: 'user', words: "user's own", constant: null } }); }],
     ['an incomplete record that names nothing missing', 'built:incomplete', (r) => { r.outcome.missing = []; }],
+    ['an agreement row for an engine version not compared', 'normal-result.json', (r) => { r.madeWith.engineVersion = '0.0.0'; if (!r.constants.some((x) => x.id === 'agreement-between-implementations'))
+            r.constants.push({ id: 'agreement-between-implementations', name: 'Agreement between implementations', value: 'Displayed values, statuses, refusals, flags and labels identical; unrounded values within a relative difference of 1e-15', unit: null, kind: 'convention', status: 'characterised', basis: 'Tested for this engine version: an independent reimplementation and independently written expected values agree with this engine within this bound.', appliesTo: 'Every result', source: null, labelledAs: null }); }],
+    ['a compared engine version without its agreement row', 'normal-result.json', (r) => { r.madeWith.engineVersion = COMPARED_ENGINE_VERSIONS[0]; r.constants = r.constants.filter((x) => x.id !== 'agreement-between-implementations'); }],
 ];
 let caught = 0;
 for (const [name, file, mutate] of MUTANTS) {

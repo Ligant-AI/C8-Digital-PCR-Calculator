@@ -4,7 +4,8 @@ import { MICRO, PARTITION_UNITS, partitionVolumeInMicroLitre } from './units.js'
 import { PANEL_ENTRIES } from './panel.js';
 import { MSG, FIELD } from './messages.js';
 export const CAPS = Object.freeze({ preparations: 6, wellsPerPrep: 8, stepsPerPrep: 6 });
-export const REFUSAL_ORDER = ['T1-HI-01', 'T1-HI-02', 'T1-HI-03', 'T1-HI-04', 'T1-HI-05', 'T1-HI-06', 'T1-HI-07', 'T1-HI-08', 'T1-HI-09', 'T1-HI-11', 'T1-HI-12', 'T1-HI-13'];
+export const REFUSAL_ORDER = ['T1-HI-01', 'T1-HI-02', 'T1-HI-03', 'T1-HI-04', 'T1-HI-05', 'T1-HI-06', 'T1-HI-07', 'T1-HI-08', 'T1-HI-09', 'T1-HI-11', 'T1-HI-12', 'T1-HI-13', 'T1-HI-14'];
+export const ACCEPTED_CEILING = D.fromText('90000000');
 const MODES = ['concentration', 'titre'];
 const ENTRIES = ['typed', 'pasted'];
 const KINDS = ['none', 'steps', 'factor'];
@@ -136,11 +137,8 @@ export function missingDeclarations(c) {
     }
     return out;
 }
-export function refusalsOf(c) {
-    const sep = separatorOf(c);
-    const items = [];
+function recorder(items, sep) {
     const push = (code, field, names, message) => items.push({ code, field, wells: names.wells || [], preps: names.preps || [], steps: names.steps || [], message });
-    const mark = (dec) => D.toText(dec, sep);
     const read = (text, fieldKey, names) => {
         const r = readNumber(text, sep);
         if (r.kind === 'ok' || r.kind === 'absent')
@@ -149,11 +147,11 @@ export function refusalsOf(c) {
         push('T1-HI-09', fieldKey, names, MSG[`T1-HI-09-${r.kind}`](field, r.text, sep));
         return null;
     };
-    const pvCase = c.partitionVolume;
-    const pv = { read: read(pvCase.value, 'partitionVolume', {}), unit: pvCase.unit };
-    if (pv.read && D.isZero(pv.read.dec))
-        push('T1-HI-05', 'partitionVolume', {}, MSG['T1-HI-05-partitionVolume']());
-    const wells = c.wells.map((w) => {
+    return { push, read };
+}
+export function wellCountRefusals(caseWells, sep, items) {
+    const { push, read } = recorder(items, sep);
+    const wells = caseWells.map((w) => {
         const names = { wells: [w.well] };
         const k = read(w.positive, 'positive', names);
         const n = read(w.accepted, 'accepted', names);
@@ -171,7 +169,21 @@ export function refusalsOf(c) {
             push('T1-HI-05', 'positive', names, MSG['T1-HI-05-count'](FIELD.positive, k.text));
         if (n && !nWhole)
             push('T1-HI-05', 'accepted', names, MSG['T1-HI-05-count'](FIELD.accepted, n.text));
+        if (n && D.lt(ACCEPTED_CEILING, n.dec))
+            push('T1-HI-14', 'accepted', names, MSG['T1-HI-14'](nWhole ? D.groupedInteger(n.dec) : n.text));
     }
+    return wells;
+}
+export function refusalsOf(c) {
+    const sep = separatorOf(c);
+    const items = [];
+    const { push, read } = recorder(items, sep);
+    const mark = (dec) => D.toText(dec, sep);
+    const pvCase = c.partitionVolume;
+    const pv = { read: read(pvCase.value, 'partitionVolume', {}), unit: pvCase.unit };
+    if (pv.read && D.isZero(pv.read.dec))
+        push('T1-HI-05', 'partitionVolume', {}, MSG['T1-HI-05-partitionVolume']());
+    const wells = wellCountRefusals(c.wells, sep, items);
     const preps = c.preparations.map((p) => {
         const names = { preps: [p.prep] };
         const total = read(valueOf(p.total), 'total', names);

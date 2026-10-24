@@ -1,5 +1,5 @@
 import { escapeHtml as esc } from '@ligant/bench-chrome';
-import { UI } from './text.js';
+import { RULED, RULED_1_1, UI } from './text.js';
 import { UNDEFINED_TEXT } from '../engine/numfmt.js';
 export const pointMark = (text) => String(text).replace(/,/g, '.');
 export function vdText(result) {
@@ -19,7 +19,7 @@ export function wellWorkingSteps(prep, result, well, source) {
     }
     const R = pointMark(prep.total.trim());
     const V = pointMark(prep.sample.trim());
-    steps.push([W.lambda, `lambda = −ln(1 − p) = −ln(1 − ${well.p.display}) = ${well.lambda.display}`]);
+    steps.push([W.lambda, `lambda = −ln(1 − p) = −ln(1 − (${well.p.fraction})) = ${well.lambda.display}`]);
     steps.push([W.cRxn, `c_rxn = lambda ÷ Vd = ${well.lambda.display} ÷ ${vd} = ${well.cRxn.display}`]);
     steps.push([W.ratio, `r = R ÷ V = ${R} ÷ ${V} = ${well.ratio.display}`]);
     steps.push([W.cDil, `c_rxn × r = ${well.cRxn.display} × ${well.ratio.display} = ${well.cDil.display}`]);
@@ -39,7 +39,11 @@ export function wellWorkingSteps(prep, result, well, source) {
     return steps;
 }
 export function wellWorking(prep, result, well, source) {
-    return `<ol class="working">${wellWorkingSteps(prep, result, well, source).map(line).join('')}</ol><p class="help">${esc(UI.working.wellNote)}</p>`;
+    const fl07 = result.flags.some((f) => f.display === 'FL-07');
+    const nodes = wellWorkingSteps(prep, result, well, source).map(([label, formula], i) => (i === 0
+        ? `<li class="flow-declared"><span class="w-label">${esc(label)}</span> <span class="num w-formula">${esc(formula)}</span>${fl07 ? ' <a class="code" href="#flag-FL-07">FL-07</a>' : ''}</li>`
+        : line([label, formula])));
+    return `<p class="help flow-key">${esc(RULED_1_1.flowKey)}</p><ol class="working flow">${nodes.join('')}</ol><p class="help">${esc(RULED.rounding)}</p>`;
 }
 export function meanWorkingSteps(result) {
     const mean = result.mean;
@@ -53,5 +57,5 @@ export function meanWorking(result) {
     const steps = meanWorkingSteps(result);
     if (!steps.length)
         return '';
-    return `<ol class="working">${steps.map(line).join('')}</ol><p class="help">${esc(UI.working.meanNote)}</p>`;
+    return `<ol class="working">${steps.map(line).join('')}</ol><p class="help">${esc(UI.working.meanNote)}</p><p class="help">${esc(RULED.rounding)}</p>`;
 }

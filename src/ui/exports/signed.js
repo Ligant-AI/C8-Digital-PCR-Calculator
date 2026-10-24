@@ -177,6 +177,18 @@ export const SIGNED_CONSTANTS = Object.freeze([
         "labelledAs": null
     },
     {
+        "id": "refuse-accepted-above-ceiling",
+        "name": "Accepted partitions per well",
+        "value": "At most 90,000,000",
+        "unit": null,
+        "kind": "threshold",
+        "status": "derived",
+        "basis": "Derivation: p = k ÷ n is held as a double, which can differ from the exact ratio by up to 2^−54; lambda then differs by up to about 2^−54 × n ÷ (n − k), at most about 2^−54 × n. Up to 90,000,000 accepted partitions this stays below half a unit of the last figure of lambda shown; above it, the figures shown can be wrong.",
+        "appliesTo": "Each well's counts",
+        "source": null,
+        "labelledAs": null
+    },
+    {
         "id": "refuse-concentrating-step",
         "name": "Dilution step total below its volume in; one overall factor below 1",
         "value": "Refused",

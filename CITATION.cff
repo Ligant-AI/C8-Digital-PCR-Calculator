@@ -10,8 +10,8 @@ authors:
   - family-names: Modi
     given-names: A.B.
     affiliation: Ligant AI Incorporated
-version: v1.0.0
-date-released: 2026-10-21
+version: v1.1.0
+date-released: 2026-10-24
 license: Apache-2.0
 repository-code: https://github.com/Ligant-AI/C8-Digital-PCR-Calculator
 url: https://benchtools.ligant.ai/digital-pcr-calculator/

@@ -1,13 +1,26 @@
 import { escapeHtml as esc } from '@ligant/bench-chrome';
-import { RULED, UI } from './text.js';
+import { RULED, RULED_1_1, UI } from './text.js';
 import { PANEL_GROUPS, PANEL_VERSION, panelEntry, entryName } from './published.js';
-import { prepName, wellRows, splitPaste } from './state.js';
+import { prepName, wellRows, splitPaste, caseOf } from './state.js';
 import { learnPanelHtml } from './learn.js';
+import { titerOrderHtml } from './visuals/titer-order.js';
 const UL = 'µL';
 const unitHeading = (text) => { const m = /^(.*) \((µL)\)$/.exec(text); return m ? `${esc(m[1])} <span class="unit">(${m[2]})</span>` : esc(text); };
 export const noteId = (key) => `note-${String(key).replace(/[^A-Za-z0-9]+/g, '-')}`;
 const note = (key) => `<p class="note" id="${noteId(key)}" data-note="${esc(key)}" hidden></p>`;
 const why = (text, source = '', id = '') => `<p class="help why"${id ? ` id="why-${id}"` : ''}><b>${esc(UI.whyWeAsk)}</b> ${esc(text)}${source ? ` <span class="why-source">${source}</span>` : ''}</p>`;
+const fold = (key, line, learn) => `<details class="why-fold" data-why="${esc(key)}"${learn ? ' open' : ''}><summary>${esc(UI.whyFold)}<span class="visually-hidden">${esc(UI.whyFoldSuffix(UI.whyFoldField[key]))}</span></summary>${line}</details>`;
+export const WHY_NOTES = Object.freeze({
+    counts: /^well:\d+:(counts|positive|accepted)$/,
+    reaction: /^prep:[^:]+:(total|sample)$/,
+    dilution: /^prep:[^:]+:(kind|factor|steps|step:\d+(:in|:total)?)$/,
+    instrument: /^instrument$/,
+    target: /^target$/,
+    replicates: null,
+    lysis: /^titre:(lysis|lysisText)$/,
+    class: /^titre:(class|classText)$/,
+    separator: /^paste:separator$/,
+});
 const idsIn = (html) => [...String(html).matchAll(/id="((?:why|help)-[^"]+)"/g)].map((m) => m[1]);
 const described = (ids) => (ids.length ? ` aria-describedby="${esc(ids.join(' '))}"` : '');
 const input = (bind, value, { id = '', num = false, label = '', readonly = false, mode = 'decimal', desc = [] } = {}) => `<input type="text"${id ? ` id="${esc(id)}"` : ''} data-bind="${esc(bind)}" value="${esc(value)}"${num ? ` class="num" inputmode="${mode}"` : ''} autocomplete="off" spellcheck="false"${label ? ` aria-label="${esc(label)}"` : ''}${described(desc)}${readonly ? ' readonly' : ''}>`;
@@ -44,16 +57,18 @@ export function sourceText(source) {
     return RULED.usersOwn;
 }
 function runPanel(state, n) {
+    const learn = Boolean(state.learn);
     const units = ['nL', 'pL', UL].map((u) => `<option value="${esc(u)}"${state.pv.unit === u ? ' selected' : ''}>${esc(u)}</option>`).join('');
-    const pv = `<div class="field-row pv-row"><div class="field"><label for="pv-value">${esc(RULED.partitionVolume)}</label>${input('pv.value', state.pv.value, { id: 'pv-value', num: true, desc: [noteId('pv:value'), 'pv-echo', 'why-partition-volume'] })}${note('pv:value')}</div>`
-        + `<div class="field"><label for="pv-unit">${esc(UI.unit)}</label><select id="pv-unit" class="num" data-bind="pv.unit"${described([noteId('pv:unit'), 'why-partition-volume'])}><option value=""${state.pv.unit ? '' : ' selected'}>${esc(UI.choose)}</option>${units}</select>${note('pv:unit')}</div></div>`
+    const pv = `<div class="pv-block" id="pv-block"><div class="field-row pv-row"><div class="field"><label for="pv-value">${esc(RULED.partitionVolume)}</label>${input('pv.value', state.pv.value, { id: 'pv-value', num: true, desc: [noteId('pv:value'), 'pv-echo', 'pv-declared', 'why-partition-volume'] })}${note('pv:value')}</div>`
+        + `<div class="field"><label for="pv-unit">${esc(UI.unit)}</label><select id="pv-unit" class="num" data-bind="pv.unit"${described([noteId('pv:unit'), 'pv-declared', 'why-partition-volume'])}><option value=""${state.pv.unit ? '' : ' selected'}>${esc(UI.choose)}</option>${units}</select>${note('pv:unit')}</div></div>`
         + '<p class="help num" id="pv-echo" data-slot="pv-echo"></p>'
+        + `<p class="pv-declared" id="pv-declared">${esc(RULED_1_1.pvDeclared)}</p>`
+        + why(RULED.whyPartitionVolume, '', 'partition-volume')
         + `<p class="help" id="pv-source"><b>${esc(UI.block.source)}:</b> <span data-slot="pv-source">${esc(sourceText(state.pv.source))}</span></p>`
-        + publishedValues()
-        + why(RULED.whyPartitionVolume, '', 'partition-volume');
-    return panel(n, 'run', UI.headings.run, field('instrument', RULED.instrument, input('instrument', state.instrument, { id: 'instrument' }), 'instrument', why(RULED.whyInstrument, '', 'instrument'))
+        + publishedValues() + '</div>';
+    return panel(n, 'run', UI.headings.run, field('instrument', RULED.instrument, input('instrument', state.instrument, { id: 'instrument' }), 'instrument', fold('instrument', why(RULED.whyInstrument, '', 'instrument'), learn))
         + pv
-        + field('target', RULED.targetName, input('target', state.target, { id: 'target' }), 'target', why(RULED.whyTarget, '', 'target')));
+        + field('target', RULED.targetName, input('target', state.target, { id: 'target' }), 'target', fold('target', why(RULED.whyTarget, '', 'target'), learn)));
 }
 function stepsTable(p, factors) {
     const rows = p.steps.map((s, i) => `<tr data-step="${i}"><td class="idx">${i + 1}</td>`
@@ -67,6 +82,7 @@ function stepsTable(p, factors) {
         + `<span class="help">${esc(UI.overallFactor)} <span class="num" data-slot="overall:${p.uid}">${factors && factors.overall ? `× ${esc(factors.overall)}` : ''}</span></span></div></div>${note(`prep:${p.uid}:steps`)}`;
 }
 function prepBlock(state, p, i, factors) {
+    const learn = Boolean(state.learn);
     const k = `prep:${p.uid}`;
     const first = i === 0;
     const dilutionBody = p.kind === 'steps' ? stepsTable(p, factors) + `<div class="visual-slot" data-slot="tubes:${p.uid}"></div>`
@@ -75,14 +91,14 @@ function prepBlock(state, p, i, factors) {
         + `<div class="prep-head"><h3>${esc(UI.preparation)} <span class="num">${esc(prepName(state, p))}</span></h3>`
         + (state.preps.length > 1 ? `<button type="button" class="remove-row" data-action="remove-prep" data-prep="${p.uid}">${esc(UI.removePreparation)}</button>` : '') + '</div>'
         + `<div class="field prep-name"><label for="name-${p.uid}">${esc(UI.preparationName)}</label>${input(`prep:${p.uid}:name`, p.name, { id: `name-${p.uid}` })}${note(`${k}:name`)}</div>`
-        + radios(`kind-${p.uid}`, `prep:${p.uid}:kind`, { none: RULED.notDiluted, steps: RULED.dilutionSteps, factor: RULED.oneFactor }, p.kind, UI.dilutionLegend, `${k}:kind`, first ? why(RULED.whyDilution, '', 'dilution') : '', first ? [] : ['why-dilution'])
+        + radios(`kind-${p.uid}`, `prep:${p.uid}:kind`, { none: RULED.notDiluted, steps: RULED.dilutionSteps, factor: RULED.oneFactor }, p.kind, UI.dilutionLegend, `${k}:kind`, first ? fold('dilution', why(RULED.whyDilution, '', 'dilution'), learn) : '', first ? [] : ['why-dilution'])
         + dilutionBody
         + field(`total-${p.uid}`, `${RULED.total} (${UL})`, input(`prep:${p.uid}:total`, p.total, { id: `total-${p.uid}`, num: true }), `${k}:total`, '', [`help-reaction-${p.uid}`, 'why-reaction'])
         + field(`sample-${p.uid}`, `${RULED.sample} (${UL})`, input(`prep:${p.uid}:sample`, p.sample, { id: `sample-${p.uid}`, num: true }), `${k}:sample`, '', [`help-reaction-${p.uid}`, 'why-reaction'])
         + `<div class="field"><label for="mix-${p.uid}">${esc(RULED.mix.replace(/ \(µL\)$/, ''))} (${UL}) <span class="optional">${esc(UI.optional)}</span></label>${input(`prep:${p.uid}:mix`, p.mix, { id: `mix-${p.uid}`, num: true, desc: [noteId(`${k}:mix`), `help-reaction-${p.uid}`] })}${note(`${k}:mix`)}</div>`
         + `<p class="help" id="help-reaction-${p.uid}">${esc(RULED.reactionExample)}</p>`
         + `<div class="visual-slot" data-slot="bar:${p.uid}"></div>`
-        + (first ? why(RULED.whyReaction, '', 'reaction') : '')
+        + (first ? fold('reaction', why(RULED.whyReaction, '', 'reaction'), learn) : '')
         + '</div>';
 }
 function prepsPanel(state, n, factorsByPrep) {
@@ -99,7 +115,7 @@ function pasteSteps(state) {
     const map = (key, label) => `<label class="field"><span class="label">${esc(label)}</span><select data-bind="paste.mapping.${key}"${described([noteId('paste:mapping')])}>${columnOptions(key)}${numberOption(key)}</select></label>`;
     return `<div class="paste stack" id="paste-area">`
         + `<div class="field"><label for="paste-text">${esc(UI.pasteLabel)}</label><textarea id="paste-text" class="num" rows="5" spellcheck="false" autocomplete="off" data-bind="paste.text">${esc(p.text)}</textarea>${note('paste:text')}</div>`
-        + radios('separator', 'paste.separator', UI.separatorOptions, p.separator, UI.separatorLegend, 'paste:separator', `<p class="help" id="help-separator-scope">${esc(UI.separatorScope)}</p>${why(RULED.whySeparator, '', 'separator')}`)
+        + radios('separator', 'paste.separator', UI.separatorOptions, p.separator, UI.separatorLegend, 'paste:separator', `<p class="help" id="help-separator-scope">${esc(UI.separatorScope)}</p>${fold('separator', why(RULED.whySeparator, '', 'separator'), Boolean(state.learn))}`)
         + radios('header-row', 'paste.headerRow', UI.headerOptions, p.headerRow, UI.headerLegend, 'paste:header')
         + `<div class="field"><span class="label">${esc(UI.mappingHeading)}</span><p class="help">${esc(UI.mappingHelp)}</p><div class="mapping">`
         + map('well', UI.wellColumn) + map('positive', RULED.positive) + map('accepted', UI.acceptedShort) + `</div>${note('paste:mapping')}</div>`
@@ -124,15 +140,16 @@ function wellsPanel(state, n) {
         + `<div class="table-foot">${pasted ? `<span class="help">${esc(UI.pastedRowsNote)}</span>` : `<button type="button" class="add" data-action="add-well">${esc(UI.addWell)}</button><span class="help">${esc(UI.pasteHint)}</span>`}</div></div>`;
     return panel(n, 'wells', UI.headings.wells, `<p class="help">${esc(RULED.partitionDefinition)}</p>`
         + `<p class="help" id="help-accepted">${esc(RULED.acceptedFull)}.</p>`
-        + why(RULED.whyCounts, '', 'counts')
+        + fold('counts', why(RULED.whyCounts, '', 'counts'), Boolean(state.learn))
         + (pasted ? pasteSteps(state) : '')
         + table + note('wells')
-        + why(RULED.whyReplicates, '', 'replicates')
+        + fold('replicates', why(RULED.whyReplicates, '', 'replicates'), Boolean(state.learn))
         + `<div class="field-row"><div class="field"><label for="expected">${esc(UI.expected)}</label>${input('expected', state.expected, { id: 'expected', num: true, mode: 'numeric', desc: [noteId('expected')] })}${note('expected')}</div>`
         + `<div class="field"><label for="expected-source">${esc(UI.valueSource)}</label>${input('expectedSource', state.expectedSource, { id: 'expected-source' })}</div></div>`);
 }
 function titerPanel(state, n) {
     const t = state.titre;
+    const learn = Boolean(state.learn);
     const sw = `<label class="switch"><input type="checkbox" id="titer-switch" data-bind="titer"${state.titer ? ' checked' : ''}> <span>${esc(state.titer ? UI.on : UI.off)}</span></label>`;
     if (!state.titer)
         return panel(n, 'titer', UI.headings.titer, '', sw);
@@ -141,9 +158,10 @@ function titerPanel(state, n) {
         + radios('dnase', 'titre.dnase', RULED.freeDnaOptions, t.dnase, RULED.freeDna, 'titre:dnase', (t.dnase === 'other' ? field('dnase-text', UI.methodLabel, input('titre.dnaseText', t.dnaseText, { id: 'dnase-text' }), 'titre:dnaseText') : '')
             + why(RULED.whyFreeDna, `${esc(UI.sourcePrefix)} ${esc(RULED.whyFreeDnaSource)}.`, 'free-dna'))
         + radios('lysis', 'titre.lysis', RULED.lysisOptions, t.lysis, UI.lysisLegend, 'titre:lysis', field('lysis-text', RULED.lysisConditions, input('titre.lysisText', t.lysisText, { id: 'lysis-text' }), 'titre:lysisText')
-            + why(RULED.whyLysis, `${esc(UI.sourcePrefix)} ${esc(UI.zinAbstract)} “${esc(RULED.whyLysisSourceStart)}”. ${zin}`, 'lysis'))
+            + fold('lysis', why(RULED.whyLysis, `${esc(UI.sourcePrefix)} ${esc(UI.zinAbstract)} “${esc(RULED.whyLysisSourceStart)}”. ${zin}`, 'lysis'), learn))
+        + `<div class="titer-order-slot" data-slot="titer-order">${titerOrderHtml(caseOf(state).titre)}</div>`
         + radios('target-class', 'titre.targetClass', RULED.classOptions, t.targetClass, UI.classLegend, 'titre:class', (t.targetClass === 'other' ? field('class-text', UI.classTextLabel, input('titre.targetClassText', t.targetClassText, { id: 'class-text' }), 'titre:classText') : '')
-            + why(RULED.whyClass, '', 'class'))
+            + fold('class', why(RULED.whyClass, '', 'class'), learn))
         + `<p class="help">${esc(RULED.twoTargets)}</p>`
         + `<div class="field-row"><div class="field"><label for="ratio">${esc(RULED.ratioLimit)}</label>${input('titre.ratio', t.ratio, { id: 'ratio', num: true, desc: [noteId('titre:ratio')] })}${note('titre:ratio')}</div>`
         + `<div class="field"><label for="ratio-source">${esc(UI.valueSource)}</label>${input('titre.ratioSource', t.ratioSource, { id: 'ratio-source' })}</div></div>`

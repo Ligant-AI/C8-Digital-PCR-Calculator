@@ -1,7 +1,7 @@
 import { validate } from './validate.js';
 import { ORDER_OF_EVALUATION, ENGINE_VERSION } from './version.js';
 import { lambdaOf } from './lambda.js';
-import { formatEstimate, formatLambda, formatRatio, formatFraction, UNDEFINED_TEXT } from './numfmt.js';
+import { formatEstimate, formatLambda, formatRatio, formatRatioNotOne, formatFraction, UNDEFINED_TEXT } from './numfmt.js';
 import { labelOf, headlineOf, recordLabelOf } from './labels.js';
 import { flagsOf } from './flags.js';
 import { echoVolume } from './units.js';
@@ -44,7 +44,7 @@ function wellResult(read, prepValues, vd) {
         echo: { positive: w.positive, accepted: w.accepted },
         inMean: w.inMean,
         status: 'computed',
-        p: { unrounded: p, display: formatRatio(p), fraction: formatFraction(k.dec, n.dec, D.groupedInteger) },
+        p: { unrounded: p, display: D.lt(k.dec, n.dec) ? formatRatioNotOne(p) : formatRatio(p), fraction: formatFraction(k.dec, n.dec, D.groupedInteger) },
         lambda: null,
         cRxn: null,
         ratio: ratioValue(ratio),

@@ -36,4 +36,5 @@ export const MSG = Object.freeze({
     'T1-HI-13-preparations': (count) => `This analysis has ${count} preparations. The tool takes at most 6 preparations in one analysis. Start a second analysis for the rest.`,
     'T1-HI-13-wells': (prep, count) => `Preparation ${prep} has ${count} wells. The tool takes at most 8 wells for one preparation. Enter the others as a second preparation or a second analysis.`,
     'T1-HI-13-steps': (prep, count) => `Preparation ${prep} has ${count} dilution steps. The tool takes at most 6 steps for one preparation. Enter the overall factor instead, or combine steps.`,
+    'T1-HI-14': (n) => `Accepted partitions (${n}) are more than 90,000,000, the most this calculator takes for one well: above that, its arithmetic can be wrong in the digits it shows. Check that the number is the accepted partitions of one well.`,
 });

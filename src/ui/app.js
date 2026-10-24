@@ -3,7 +3,10 @@ import { readNumber } from '../engine/parse.js';
 import { partitionVolumeInMicroLitre, echoVolume } from '../engine/units.js';
 import { escapeHtml as esc } from '@ligant/bench-chrome';
 import { initialState, newPrep, newStep, newWell, caseOf, fieldNotes, formProblems, insertPanelValue, separatorOf, wellRows, prepName } from './state.js';
-import { formHtml, sourceText } from './form.js';
+import { formHtml, sourceText, WHY_NOTES } from './form.js';
+import { titerOrderHtml } from './visuals/titer-order.js';
+import { dotsHtml } from './visuals/dots.js';
+import { curveHtml } from './visuals/curve.js';
 import { summaryHtml, detailHtml, factorsFrom } from './results.js';
 import { sectionsHtml } from './sections.js';
 import { faqHtml } from './seo.js';
@@ -15,6 +18,7 @@ import { buildRecord, exportDate } from './exports/record.js';
 import { notebookText } from './exports/notebook.js';
 import { csvText } from './exports/csv.js';
 import { jsonText } from './exports/json.js';
+import { svgText, SVG_MIME } from './exports/svg.js';
 import { benchSheetHtml, sheetReady } from './exports/benchsheet.js';
 import { fileExport } from './exports/save.js';
 import { exportPanelHtml, csvDecimalOf } from './exports/panel.js';
@@ -23,6 +27,9 @@ const $ = (id) => document.getElementById(id);
 const state = initialState();
 let result = null;
 let learnConfirming = false;
+let spreadOpen = {};
+let whyUser = {};
+let whyForced = {};
 const STRUCTURAL = /^(titer|prep:[^:]+:kind|titre\.(dnase|targetClass)|paste\.(text|separator|headerRow|mapping\.\w+)|pv\.unit|prep:[^:]+:name)$/;
 function setByBind(bind, el) {
     const value = el.type === 'checkbox' ? el.checked : el.value;
@@ -74,7 +81,11 @@ function renderForm() {
     const focusBind = active && active.dataset ? active.dataset.bind : null;
     const focusValue = active && active.type === 'radio' ? active.value : null;
     const caret = active && typeof active.selectionStart === 'number' ? active.selectionStart : null;
+    const tryOpen = Boolean(document.querySelector('#tool-form details.try-answer[open]'));
     $('tool-form').innerHTML = formHtml(state, factorsFrom(state), learnConfirming);
+    const tryAnswer = $('tool-form').querySelector('details.try-answer');
+    if (tryAnswer)
+        tryAnswer.open = tryOpen;
     if (focusBind) {
         const sel = `[data-bind="${CSS.escape(focusBind)}"]${focusValue ? `[value="${CSS.escape(focusValue)}"]` : ''}`;
         const el = $('tool-form').querySelector(sel);
@@ -99,6 +110,19 @@ function placeNotes(notes) {
     }
     for (const tr of document.querySelectorAll('tr.row-note'))
         tr.hidden = ![...tr.querySelectorAll('[data-note]')].some((p) => !p.hidden);
+}
+function foldWhys() {
+    const shown = [...document.querySelectorAll('[data-note]')].filter((el) => !el.hidden).map((el) => el.dataset.note);
+    for (const d of document.querySelectorAll('details.why-fold[data-why]')) {
+        const key = d.dataset.why;
+        const re = WHY_NOTES[key];
+        const forced = Boolean(state.learn) || Boolean(re && shown.some((k) => re.test(k)));
+        if (forced && !whyForced[key])
+            d.open = true;
+        else if (!forced)
+            d.open = whyUser[key] === true;
+        whyForced[key] = forced;
+    }
 }
 function refusalNotes(res) {
     const out = {};
@@ -167,6 +191,20 @@ function update({ structural = false } = {}) {
     for (const [k, v] of Object.entries(refusalNotes(result)))
         notes[k] = { ...(notes[k] || {}), refusal: v.refusal };
     placeNotes(notes);
+    if (structural)
+        whyForced = {};
+    foldWhys();
+    const order = document.querySelector('[data-slot="titer-order"]');
+    const titre = order && state.titer ? caseOf(state).titre : null;
+    if (titre)
+        order.innerHTML = titerOrderHtml(titre);
+    const dotsSlot = document.querySelector('[data-slot="learn-dots"]');
+    const curveSlot = document.querySelector('[data-slot="learn-curve"]');
+    const first = !problems.length && result.status === 'result' ? result.wells[0] : null;
+    if (dotsSlot)
+        dotsSlot.innerHTML = first ? dotsHtml(first, separatorOf(state), result.flags) : '';
+    if (curveSlot)
+        curveSlot.innerHTML = first ? curveHtml(first) : '';
     const echo = document.querySelector('[data-slot="pv-echo"]');
     if (echo)
         echo.textContent = pvEcho();
@@ -178,7 +216,9 @@ function update({ structural = false } = {}) {
     $('kept-summary').innerHTML = s.block;
     $('kept-summary').hidden = !s.block;
     $('summary').innerHTML = s.body;
-    const d = detailHtml(state, problems.length ? { status: 'incomplete' } : result);
+    for (const x of document.querySelectorAll('details.spread-details[data-spread]'))
+        spreadOpen[x.dataset.spread] = x.open;
+    const d = detailHtml(state, problems.length ? { status: 'incomplete' } : result, spreadOpen);
     $('detail-panel').hidden = !d.body;
     $('kept-detail').innerHTML = d.block;
     $('detail').innerHTML = d.body;
@@ -202,11 +242,19 @@ const fileName = (ext) => `${CONFIG.slug}-${exportDate()}.${ext}`;
 const EXPORTS = {
     csv: fileExport('csv', () => csvText(buildRecord(state, result), csvDecimalOf(state)), () => fileName('csv'), 'text/csv;charset=utf-8'),
     json: fileExport('json', () => jsonText(state, result, formProblems(state)), () => fileName('json'), 'application/json'),
+    svg: fileExport('svg', () => svgText(buildRecord(state, result), result), () => fileName('svg'), SVG_MIME),
 };
+function svgControl() {
+    if (wellRows(state).length < 2)
+        return 'absent';
+    if (!hasResult())
+        return 'disabled';
+    return result.wells.length >= 2 && result.wells.some((w) => w.status === 'computed') ? 'enabled' : 'absent';
+}
 function renderExports() {
     const panel = $('export-panel');
     const focused = document.activeElement && panel.contains(document.activeElement) ? document.activeElement.dataset.export || null : null;
-    panel.innerHTML = exportPanelHtml(state, { hasResult: hasResult(), sheetReady: sheetReady(state) });
+    panel.innerHTML = exportPanelHtml(state, { hasResult: hasResult(), sheetReady: sheetReady(state), svg: svgControl() });
     if (focused)
         panel.querySelector(`[data-export="${focused}"]`)?.focus();
 }
@@ -256,12 +304,17 @@ function onAction(btn) {
     if (a === 'learn-load') {
         if (entriesInProgress(state))
             learnConfirming = true;
-        else
+        else {
             loadExample(state);
+            spreadOpen = {};
+            whyUser = {};
+        }
     }
     if (a === 'learn-replace') {
         loadExample(state);
         learnConfirming = false;
+        spreadOpen = {};
+        whyUser = {};
     }
     if (a === 'learn-keep')
         learnConfirming = false;
@@ -298,8 +351,17 @@ export function start() {
     };
     form.addEventListener('input', onEdit);
     form.addEventListener('change', onEdit);
-    form.addEventListener('click', (e) => { const b = e.target.closest('button[data-action]'); if (b)
-        onAction(b); });
+    form.addEventListener('click', (e) => {
+        const sum = e.target.closest('details.why-fold > summary');
+        if (sum) {
+            const d = sum.parentElement;
+            whyUser[d.dataset.why] = !d.open;
+            return;
+        }
+        const b = e.target.closest('button[data-action]');
+        if (b)
+            onAction(b);
+    });
     form.addEventListener('paste', (e) => {
         const el = e.target;
         if (!el.dataset || !/^well:.+:(positive|accepted|label)$/.test(el.dataset.bind || ''))
@@ -334,7 +396,7 @@ export function start() {
             copyNotebook();
         else if (b.dataset.export === 'sheet')
             printSheet();
-        else
+        else if (EXPORTS[b.dataset.export])
             EXPORTS[b.dataset.export].run();
     });
     $('export-panel').addEventListener('change', (e) => {

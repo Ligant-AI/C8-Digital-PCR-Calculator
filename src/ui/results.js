@@ -7,6 +7,8 @@ import { preparationFactors } from '../engine/determine.js';
 import { negativeFraction } from '../engine/visual.js';
 import { wellWorking, meanWorking } from './working.js';
 import { partitionsHtml } from './visuals/partitions.js';
+import { overviewHtml, wellCardId } from './visuals/overview.js';
+import { spreadHtml, spreadKey } from './visuals/spread.js';
 import { sourceText } from './form.js';
 import { CONFIG } from '../config.js';
 const R = Object.freeze({
@@ -77,7 +79,8 @@ export function summaryHtml(state, result, problems) {
         body: headlineFigures(result) + fl04 + meanNote(result)
             + (meanWork ? `<details class="options working-details" data-result="mean-working"><summary>${esc(UI.showWorking)}</summary>${meanWork}</details>` : '')
             + flagWords(result)
-            + `<p class="hint">${esc(RULED.originalSample)}</p><p class="hint">${esc(RULED.precision)}</p>${separatorOf(state) === ',' ? `<p class="hint" data-slot="comma-entries">${esc(UI.commaEntries)}</p>` : ''}<p class="hint">${esc(RULED.rounding)}</p>`
+            + overviewHtml(result)
+            + `<p class="hint">${esc(RULED.originalSample)}</p><p class="hint">${esc(RULED.precision)}</p>${separatorOf(state) === ',' ? `<p class="hint" data-slot="comma-entries">${esc(UI.commaEntries)}</p>` : ''}`
             + engineLine(result),
     };
 }
@@ -91,7 +94,7 @@ function flagWords(result) {
 export function engineLine(result) {
     return `<p class="hint engine-line">${esc(UI.engineLead)} <a class="num" href="${esc(CONFIG.engineTagUrl(result.engine))}" rel="noopener">${esc(UI.engineVersion(result.engine))}</a></p>`;
 }
-export function detailHtml(state, result) {
+export function detailHtml(state, result, spreadOpen = {}) {
     if (result.status !== 'result')
         return { block: '', body: '' };
     const cols = [UI.wellColumn, UI.preparation, RULED.positive, UI.acceptedShort, 'p', 'lambda', R.cRxn, R.cDil, R.cOrig, R.perMl, UI.inMeanColumn];
@@ -109,17 +112,19 @@ export function detailHtml(state, result) {
         + cell(w.echo.positive) + cell(w.echo.accepted) + cell(w.p.display) + cell(w.lambda.display) + cell(w.cRxn.display) + cell(w.cDil.display) + cell(w.cOrig.display) + cell(w.perMl.display)
         + `<td class="words">${esc(w.inMean ? UI.inMeanCell : RULED.notInMean)}</td></tr>`).join('')}</tbody>`).join('');
     const sep = separatorOf(state);
+    const isOpen = (w, i) => (spreadKey(w.well) in spreadOpen ? spreadOpen[spreadKey(w.well)] : Boolean(state.learn) && i === 0);
     const source = sourceText(state.pv.source);
-    const cards = result.wells.map((w) => {
+    const cards = result.wells.map((w, i) => {
         const prep = state.preps.find((p) => prepName(state, p) === w.prep);
         const neg = negativeFraction(w.echo.positive, w.echo.accepted, sep);
-        return `<section class="well-card"><h4>${esc(UI.wellCard(w.well, w.prep))} <span class="help">${esc(UI.countsOf(w.echo.positive, w.echo.accepted))}${w.inMean ? '' : `, ${esc(RULED.notInMean)}`}</span></h4>`
+        return `<section class="well-card" id="${wellCardId(i)}"><h4>${esc(UI.wellCard(w.well, w.prep))} <span class="help">${esc(UI.countsOf(w.echo.positive, w.echo.accepted))}${w.inMean ? '' : `, ${esc(RULED.notInMean)}`}</span></h4>`
             + partitionsHtml(w, neg)
+            + spreadHtml(w, sep, isOpen(w, i))
             + `<details class="options working-details" data-result="working-${esc(w.well)}"><summary>${esc(UI.showWorkingFor(w.well))}</summary>${wellWorking(prep, result, w, source)}</details></section>`;
     }).join('');
     return {
         block: blockHtml(blockModel(state, result)),
-        body: `<table class="points" id="points"><thead id="points-head"><tr>${cols.map((c) => `<th>${esc(c)}</th>`).join('')}</tr></thead>${body}</table>`
+        body: `<div class="points-frame"><table class="points" id="points"><thead id="points-head"><tr>${cols.map((c) => `<th>${esc(c)}</th>`).join('')}</tr></thead>${body}</table></div>`
             + `<h3 class="sub-h well-cards-h">${esc(UI.partitionsHeading)}</h3><div class="well-cards">${cards}</div>${engineLine(result)}`,
     };
 }

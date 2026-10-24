@@ -74,6 +74,12 @@ export function formatRatio(x) {
         return group(BigInt(x).toString());
     return dropTrailingZeros(plain(roundSig(x, 7)));
 }
+export function formatRatioNotOne(x) {
+    let s = formatRatio(x);
+    for (let n = 8; s === '1' && n <= 17; n++)
+        s = dropTrailingZeros(plain(roundSig(x, n)));
+    return s;
+}
 export function formatFraction(kDec, nDec, groupedInteger) {
     return `${groupedInteger(kDec)} ÷ ${groupedInteger(nDec)}`;
 }
@@ -84,4 +90,16 @@ export function formatFoldRatio(x, equalsLimit) {
             return s;
     }
     return plain(roundSig(x, 17));
+}
+export function formatWhole(x) {
+    if (!(x >= 0) || !Number.isFinite(x))
+        throw new Error(`formatWhole needs a non-negative finite double, not ${x}`);
+    if (x === 0)
+        return '0';
+    const { digits, scale } = exactDecimal(x);
+    const p = 10n ** BigInt(scale);
+    let q = digits / p;
+    if ((digits % p) * 2n >= p)
+        q += 1n;
+    return group(q.toString());
 }
