@@ -36,6 +36,23 @@
   <a class="skip-link" href="#main">Skip to content</a>
   <header class="masthead" id="site-header"></header>
   <main id="main" class="stack">
+    <div class="video-card">
+      <div class="video-thumb">
+        <img src="./explainer-thumbnail.png" width="640" height="360" alt="" decoding="async">
+        <video class="video-player" width="640" height="360" muted loop playsinline preload="none" hidden aria-labelledby="video-title" data-poster="./explainer-thumbnail.png">
+          <source type="application/vnd.apple.mpegurl" data-preview="./hls/explainer-preview.m3u8" data-full="./hls/explainer-1080p.m3u8">
+          <source type="video/mp4" data-preview="./explainer-preview.mp4">
+          <track kind="captions" srclang="en" label="English" data-src="./explainer-en.vtt">
+        </video>
+        <button class="video-start" type="button" aria-label="Play the video with sound and captions" data-yt-label="Watch the video on YouTube" hidden><span class="video-play" aria-hidden="true"></span></button>
+        <button class="video-pause" type="button" aria-label="Pause preview" aria-pressed="false" hidden></button>
+      </div>
+      <div class="video-text">
+        <span class="video-kicker">Learn more <span aria-hidden="true">·</span> Video, <span class="video-length">6:37</span></span>
+        <span class="video-title" id="video-title">Digital PCR: how many copies in 15,000 positive partitions?</span>
+        <span class="video-body"><span class="video-line">It follows the worked example on this page, 15,000 positive of 20,000 accepted partitions: how many copies those partitions are estimated to hold if the copies fell at random, and why the copies per µL of your original sample depend on the partition volume you declare.</span> <a class="video-yt" href="https://youtu.be/68aAS91-ZhY" rel="noopener">Watch on YouTube</a></span>
+      </div>
+    </div>
     
     <div class="layout">
       <form id="tool-form" class="stack" autocomplete="off" novalidate></form>

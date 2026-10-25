@@ -469,6 +469,80 @@ details.why-fold > .why { margin-top: 4px; }
 #export-panel button:disabled { opacity: .5; cursor: not-allowed; }
 #notebook-text { width: 100%; margin-top: 6px; font-size: 12px; white-space: pre; background: var(--surface-sunken); }
 
+.video-card {
+  --vc-surface: var(--surface); --vc-sunken: var(--surface-sunken); --vc-border: var(--border);
+  --vc-ink: var(--text-primary); --vc-text: var(--text-secondary); --vc-muted: var(--text-muted);
+  --vc-accent: var(--brand-teal); --vc-navy: var(--brand-navy);
+  --vc-radius: var(--radius); --vc-radius-sm: var(--radius-sm); --vc-mono: var(--mono);
+  --vc-thumb: 128px; --vc-title: 15px; --vc-body: 13px; --vc-title-weight: 700; --vc-play: 8px;
+}
+
+.video-card {
+  display: grid;
+  grid-template-columns: var(--vc-thumb) minmax(0, 1fr);
+  grid-template-areas: "thumb text";
+  align-items: center;
+  column-gap: 16px;
+  padding: 10px;
+  background: var(--vc-surface);
+  border: 1px solid var(--vc-border);
+  border-radius: var(--vc-radius);
+  color: var(--vc-text);
+}
+.video-card { --vc-expand: min(100%, calc(70vh * 16 / 9)); }
+@supports (height: 1svh) { .video-card { --vc-expand: min(100%, calc(70svh * 16 / 9)); } }
+.video-card [hidden] { display: none; }
+.video-thumb { grid-area: thumb; position: relative; display: block; aspect-ratio: 16 / 9; overflow: hidden; border: 1px solid var(--vc-border); border-radius: var(--vc-radius-sm); background: var(--vc-sunken); }
+.video-thumb img, .video-player { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; }
+.video-start, .video-pause, .video-play { box-sizing: border-box; }
+.video-start { position: absolute; inset: 0; display: block; width: 100%; height: 100%; margin: 0; padding: 0; border: 0; background: transparent; cursor: pointer; }
+
+.video-play { position: absolute; right: 6%; bottom: 8%; width: 3em; height: 3em; font-size: var(--vc-play); border-radius: 50%; background: var(--vc-navy); border: 2px solid var(--vc-surface); }
+.video-play::before { content: ""; position: absolute; left: 50%; top: 50%; margin: -.58em 0 0 -.33em; border-style: solid; border-width: .58em 0 .58em 1em; border-color: transparent transparent transparent var(--vc-surface); }
+.video-start:hover .video-play, .video-start:focus-visible .video-play { background: var(--vc-accent); }
+.video-pause { position: absolute; right: 6%; top: 8%; z-index: 1; width: 3em; height: 3em; margin: 0; padding: 0; font-size: var(--vc-play); border-radius: 50%; background: var(--vc-surface); border: 2px solid var(--vc-navy); cursor: pointer; }
+.video-pause::before, .video-pause::after { content: ""; position: absolute; top: 30%; width: 14%; height: 40%; background: var(--vc-navy); }
+.video-pause::before { left: 32%; }
+.video-pause::after { right: 32%; }
+.video-pause[aria-pressed="true"]::before { left: 50%; top: 50%; width: 0; height: 0; margin: -.58em 0 0 -.33em; background: none; border-style: solid; border-width: .58em 0 .58em 1em; border-color: transparent transparent transparent var(--vc-navy); }
+.video-pause[aria-pressed="true"]::after { content: none; }
+.video-pause:hover, .video-pause:focus-visible { background: var(--vc-accent); border-color: var(--vc-accent); }
+.video-pause:hover::before, .video-pause:hover::after, .video-pause:focus-visible::before, .video-pause:focus-visible::after { background: var(--vc-surface); }
+.video-pause[aria-pressed="true"]:hover::before, .video-pause[aria-pressed="true"]:focus-visible::before { background: none; border-left-color: var(--vc-surface); }
+.video-start:focus-visible { outline: 2px solid var(--vc-accent); outline-offset: -3px; }
+.video-pause:focus-visible, .video-yt:focus-visible { outline: 2px solid var(--vc-accent); outline-offset: 2px; }
+.video-player:focus-visible { outline: 2px solid var(--vc-accent); outline-offset: -2px; }
+.video-text { grid-area: text; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.video-kicker { font-size: 11px; font-weight: 600; line-height: 1.4; letter-spacing: .14em; text-transform: uppercase; color: var(--vc-muted); }
+.video-length { font-family: var(--vc-mono); letter-spacing: .04em; text-transform: none; }
+.video-title { font-size: var(--vc-title); font-weight: var(--vc-title-weight); line-height: 1.3; color: var(--vc-ink); overflow-wrap: anywhere; text-wrap: balance; }
+.video-body { font-size: var(--vc-body); line-height: 1.55; color: var(--vc-text); overflow-wrap: anywhere; }
+.video-yt { color: var(--vc-accent); font-weight: 600; white-space: nowrap; text-decoration: underline; text-underline-offset: 2px; }
+.video-yt:hover { text-decoration-thickness: 2px; }
+
+.video-card.is-playing { grid-template-columns: minmax(0, 1fr); grid-template-areas: "thumb" "text"; row-gap: 12px; align-items: start; }
+.video-card.is-playing .video-thumb { width: var(--vc-expand); justify-self: center; }
+.video-card.is-playing .video-text { width: var(--vc-expand); justify-self: center; }
+.video-card.is-playing .video-player { object-fit: contain; }
+@media (max-width: 640px) {
+  .video-card { grid-template-columns: 112px minmax(0, 1fr); grid-template-areas: "thumb kicker" "thumb title" "line line"; align-items: start; column-gap: 12px; row-gap: 6px; }
+  .video-text { display: contents; }
+  .video-kicker { grid-area: kicker; }
+  .video-title { grid-area: title; }
+  .video-body { grid-area: line; }
+  .video-card.is-playing { grid-template-columns: minmax(0, 1fr); grid-template-areas: "thumb" "kicker" "title" "line"; row-gap: 6px; }
+  .video-card.is-playing .video-thumb { width: 100%; margin-bottom: 6px; }
+  .video-play, .video-pause { right: 3%; }
+}
+@media (forced-colors: active) {
+  .video-play, .video-pause { border-color: CanvasText; }
+  .video-play::before, .video-pause[aria-pressed="true"]::before { border-left-color: CanvasText; }
+  .video-pause::before, .video-pause::after { background: CanvasText; }
+  .video-pause[aria-pressed="true"]::before { background: none; }
+  .video-pause:hover, .video-pause:focus-visible { background: Canvas; border-color: Highlight; }
+}
+@media print { .video-card { display: none; } }
+
 .bench-sheet { display: none; }
 @media print {
   html.printing-sheet body > .app > *:not(.bench-sheet), html.printing-sheet .lpc { display: none !important; }

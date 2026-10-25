@@ -1,0 +1,348 @@
+WEBVTT
+
+00:00:00.400 --> 00:00:05.149
+Your instrument says 15,000
+of 20,000 partitions are positive.
+
+00:00:05.149 --> 00:00:09.840
+How many copies are actually inside them,
+and why can't the instrument tell you?
+
+00:00:10.246 --> 00:00:14.871
+15,000 is the tempting answer,
+and it is not the answer.
+
+00:00:14.871 --> 00:00:17.493
+The reason starts with a rain shower.
+
+00:00:17.493 --> 00:00:21.221
+And one number you type
+yourself scales every result,
+
+00:00:21.221 --> 00:00:25.086
+and the calculator cannot
+check it, so stay to the end.
+
+00:00:27.357 --> 00:00:32.674
+Picture a light shower falling
+at random on 20,000 paving tiles,
+
+00:00:32.674 --> 00:00:36.194
+all the same size, each
+drop landing on its own.
+
+00:00:36.194 --> 00:00:39.140
+You cannot count the drops on each tile.
+
+00:00:39.140 --> 00:00:42.517
+You can only see whether
+a tile is wet or dry.
+
+00:00:42.924 --> 00:00:46.379
+As the rain goes on,
+some tiles take one drop,
+
+00:00:46.379 --> 00:00:49.981
+some take two, three or
+more, and some stay dry.
+
+00:00:49.981 --> 00:00:53.804
+A wet tile does not say
+how many drops made it wet.
+
+00:00:54.212 --> 00:00:55.300
+Now the clue.
+
+00:00:55.300 --> 00:00:58.252
+A quarter of the tiles are still dry.
+
+00:00:58.252 --> 00:01:02.525
+Because the drops fell at
+random, that tells you that,
+
+00:01:02.525 --> 00:01:07.652
+on average, each tile
+took about 1.386 drops.
+
+00:01:08.059 --> 00:01:11.326
+This works only if
+the drops fall at random,
+
+00:01:11.326 --> 00:01:15.464
+each one independently,
+and every tile is the same size.
+
+00:01:15.464 --> 00:01:19.094
+If drops come in clumps,
+several land on one tile
+
+00:01:19.094 --> 00:01:22.361
+and the count from
+the dry tiles is too low.
+
+00:01:22.361 --> 00:01:26.499
+In the lab, a tile is a partition,
+and a drop is a copy.
+
+00:01:28.767 --> 00:01:31.834
+In the instrument's words,
+a wet tile is a positive
+
+00:01:31.834 --> 00:01:34.429
+partition and a dry
+tile is a negative one.
+
+00:01:34.429 --> 00:01:39.207
+That call is made in your instrument's
+analysis software, not by the calculator.
+
+00:01:39.615 --> 00:01:41.642
+Only two things are counted:
+
+00:01:41.642 --> 00:01:46.535
+5,000 negative partitions
+and 15,000 positive ones.
+
+00:01:46.941 --> 00:01:50.901
+How many positives held
+one copy, two, or three?
+
+00:01:50.901 --> 00:01:52.679
+Nobody measured that.
+
+00:01:52.679 --> 00:01:56.396
+It is expected, if
+the copies fell at random.
+
+00:01:56.396 --> 00:01:58.901
+Here are the expected numbers.
+
+00:01:59.305 --> 00:02:03.301
+If copies are clumped, or
+joined on one DNA fragment,
+
+00:02:03.301 --> 00:02:05.965
+they sit together in one partition,
+
+00:02:05.965 --> 00:02:09.665
+so the real spread differs
+and the result is low.
+
+00:02:10.070 --> 00:02:15.583
+Lambda, the average number of copies
+per partition, is minus the natural
+
+00:02:15.583 --> 00:02:21.322
+log of 1 − p, where p is the fraction
+of partitions that are positive.
+
+00:02:21.322 --> 00:02:26.910
+With p at 0.75, lambda is about 1.386.
+
+00:02:29.679 --> 00:02:32.463
+This is the Ligant Digital PCR Calculator.
+
+00:02:32.463 --> 00:02:34.469
+Click Load the worked example.
+
+00:02:34.469 --> 00:02:40.554
+The form fills in, with 15,000 positive
+partitions out of 20,000 accepted.
+
+00:02:40.554 --> 00:02:41.849
+One flag is raised:
+
+00:02:41.849 --> 00:02:46.316
+the worked example's 1 nL
+partition volume is still in use.
+
+00:02:46.316 --> 00:02:51.559
+It is a round number for following the
+arithmetic, not your instrument's volume.
+
+00:02:53.021 --> 00:02:55.489
+Step 1 draws the fraction positive:
+
+00:02:55.489 --> 00:02:59.710
+one dot for
+every 100 partitions, 150 filled.
+
+00:02:59.710 --> 00:03:03.672
+The positives are lined up first
+only so you can count them.
+
+00:03:03.672 --> 00:03:07.114
+In a real run they are mixed
+in among the negatives.
+
+00:03:07.114 --> 00:03:10.101
+It is a schematic, not
+a picture of your run.
+
+00:03:11.561 --> 00:03:14.150
+Now the answer to the opening question,
+
+00:03:14.150 --> 00:03:18.097
+in the chart How many copies
+are in the positive partitions?
+
+00:03:18.097 --> 00:03:19.974
+The outlined bar is counted.
+
+00:03:19.974 --> 00:03:23.857
+The filled bars are expected,
+if the copies fell at random.
+
+00:03:23.857 --> 00:03:31.881
+About 27,726 copies estimated, all
+in the 15,000 positive partitions.
+
+00:03:38.562 --> 00:03:44.330
+Step 2 draws the rule from before, lambda
+equals minus the natural log of 1 − p.
+
+00:03:44.330 --> 00:03:46.363
+It is not fitted to your data.
+
+00:03:46.363 --> 00:03:50.689
+It stops at 99% positive
+because that is the edge
+
+00:03:50.689 --> 00:03:53.442
+of the drawing, not a limit on your data.
+
+00:03:54.904 --> 00:03:59.995
+Now predict. Positives
+go from 15,000 to 18,000:
+
+00:03:59.995 --> 00:04:01.545
+20% more.
+
+00:04:01.545 --> 00:04:04.496
+By about how much will the result rise?
+
+00:04:04.496 --> 00:04:05.824
+Pause and decide.
+
+00:04:12.231 --> 00:04:15.681
+Type 18,000 into Positive partitions.
+
+00:04:15.681 --> 00:04:17.371
+Watch four things move:
+
+00:04:17.371 --> 00:04:21.736
+the disc, the dots, the counted
+negative bar, and the result.
+
+00:04:21.736 --> 00:04:30.184
+115,129.3 copies per µL
+of the original sample:
+
+00:04:30.184 --> 00:04:33.071
+about 66% more, not 20%.
+
+00:04:35.534 --> 00:04:37.027
+Check your prediction:
+
+00:04:37.027 --> 00:04:41.894
+each extra positive adds about
+1 over the number of negatives to lambda.
+
+00:04:46.854 --> 00:04:49.545
+So why does the result climb faster?
+
+00:04:49.545 --> 00:04:53.183
+Early on, each new wet
+tile means about one drop.
+
+00:04:53.183 --> 00:04:57.111
+Later, most drops land
+on tiles that are already wet,
+
+00:04:57.111 --> 00:05:00.020
+so each newly wet tile stands for many.
+
+00:05:00.020 --> 00:05:04.894
+Again, this holds only for drops
+falling at random on equal tiles.
+
+00:05:05.804 --> 00:05:08.332
+In Show the working, one box is dashed:
+
+00:05:08.332 --> 00:05:09.722
+the partition volume.
+
+00:05:09.722 --> 00:05:13.135
+You declare it; the calculator
+has no default for it.
+
+00:05:13.135 --> 00:05:17.053
+Think of an exchange rate you
+type into a currency converter:
+
+00:05:17.053 --> 00:05:21.792
+if your rate is wrong, every converted
+amount is wrong by the same factor.
+
+00:05:21.792 --> 00:05:25.268
+Every result scales as
+1 divided by partition volume.
+
+00:05:25.268 --> 00:05:30.260
+Declare 0.85 nL instead
+of the example's 1 nL,
+
+00:05:30.260 --> 00:05:35.821
+and every result is 1.176
+times as high, about 18% more.
+
+00:05:35.821 --> 00:05:39.044
+The tool shows published
+values with their sources
+
+00:05:39.044 --> 00:05:42.204
+but never chooses one,
+and it cannot check yours.
+
+00:05:43.665 --> 00:05:46.634
+At the foot of the page, a scope box says
+
+00:05:46.634 --> 00:05:49.745
+what the tool does
+and what it does not do.
+
+00:05:51.656 --> 00:05:55.620
+Remember: a positive partition
+can hold more than one copy.
+
+00:05:55.620 --> 00:05:58.395
+Only negatives and positives are counted;
+
+00:05:58.395 --> 00:06:01.567
+the rest is expected, if
+copies fall at random.
+
+00:06:01.567 --> 00:06:04.937
+The result climbs faster
+as the negatives run out.
+
+00:06:04.937 --> 00:06:07.976
+And the partition volume
+is yours to declare.
+
+00:06:08.380 --> 00:06:09.928
+Try it with your own run.
+
+00:06:09.928 --> 00:06:14.214
+The Ligant Digital PCR Calculator
+is free, and it runs in your browser.
+
+00:06:14.214 --> 00:06:17.012
+The link is in the description.
+Before you go:
+
+00:06:17.012 --> 00:06:19.572
+what did you predict for 18,000?
+
+00:06:19.572 --> 00:06:21.060
+Tell us in the comments.

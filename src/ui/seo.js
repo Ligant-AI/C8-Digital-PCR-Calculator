@@ -29,8 +29,24 @@ export function faqPage() {
         mainEntity: RULED.faq.map(({ q, a }) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })),
     };
 }
+export function videoObject() {
+    return {
+        '@context': 'https://schema.org',
+        '@type': 'VideoObject',
+        name: 'Digital PCR: how many copies in 15,000 positive partitions?',
+        description: '15,000 of 20,000 partitions are positive. How many copies are inside them? A rain-on-tiles picture first, then the free Ligant Digital PCR Calculator: the counted and expected partitions, the curve, the "Try this" prediction and the partition volume you declare.',
+        thumbnailUrl: [`${CANONICAL}explainer-thumbnail.png`, 'https://i.ytimg.com/vi/68aAS91-ZhY/maxresdefault.jpg'],
+        uploadDate: '2026-10-24T08:07:15-07:00',
+        duration: 'PT6M37S',
+        sameAs: 'https://youtu.be/68aAS91-ZhY',
+        creator: { '@type': 'Organization', name: 'Ligant', url: 'https://ligant.ai/' },
+        publisher: { '@type': 'Organization', name: 'Ligant', url: 'https://ligant.ai/' },
+        isAccessibleForFree: true,
+        about: { '@type': 'SoftwareApplication', url: CANONICAL },
+    };
+}
 const block = (o) => `<script type="application/ld+json">${JSON.stringify(o).replace(/</g, '\\u003c')}</script>`;
 export function jsonLdHtml() {
-    return `${block(softwareApplication())}\n  ${block(faqPage())}`;
+    return `${block(softwareApplication())}\n  ${block(faqPage())}\n  ${block(videoObject())}`;
 }
 export const FAQ_HEADING = UI.faqHeading;
